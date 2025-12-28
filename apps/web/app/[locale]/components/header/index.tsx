@@ -1,3 +1,4 @@
+/** biome-ignore-all lint/suspicious/noArrayIndexKey: <explanation> */
 "use client";
 
 import { ModeToggle } from "@repo/design-system/components/mode-toggle";
@@ -11,8 +12,7 @@ import {
   NavigationMenuTrigger,
 } from "@repo/design-system/components/ui/navigation-menu";
 import type { Dictionary } from "@repo/internationalization";
-import { CommandIcon, Menu, MoveRight, X } from "lucide-react";
-import Image from "next/image";
+import { Menu, MoveRight, X } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { env } from "@/env";
@@ -74,7 +74,7 @@ export const Header = ({ dictionary }: HeaderProps) => {
                       <NavigationMenuTrigger className="font-medium text-sm">
                         {item.title}
                       </NavigationMenuTrigger>
-                      <NavigationMenuContent className="!w-[450px] p-4">
+                      <NavigationMenuContent className="w-[450px]! p-4">
                         <div className="flex grid-cols-2 flex-col gap-4 lg:grid">
                           <div className="flex h-full flex-col justify-between">
                             <div className="flex flex-col">

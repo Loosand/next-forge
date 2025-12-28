@@ -1,5 +1,6 @@
-import { auth, currentUser } from "@repo/auth/server";
+import { auth } from "@repo/auth/server";
 import { authenticate } from "@repo/collaboration/auth";
+import { headers } from "next/headers";
 
 const COLORS = [
   "var(--color-red-500)",
@@ -22,20 +23,23 @@ const COLORS = [
 ];
 
 export const POST = async () => {
-  const user = await currentUser();
-  const { orgId } = await auth();
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
 
-  if (!(user && orgId)) {
+  if (!session?.user) {
     return new Response("Unauthorized", { status: 401 });
   }
 
+  // Use user ID as room identifier since we don't have organizations
+  const roomId = session.user.id;
+
   return authenticate({
-    userId: user.id,
-    orgId,
+    userId: session.user.id,
+    orgId: roomId,
     userInfo: {
-      name:
-        user.fullName ?? user.emailAddresses.at(0)?.emailAddress ?? undefined,
-      avatar: user.imageUrl ?? undefined,
+      name: session.user.name ?? session.user.email ?? undefined,
+      avatar: session.user.image ?? undefined,
       color: COLORS[Math.floor(Math.random() * COLORS.length)],
     },
   });

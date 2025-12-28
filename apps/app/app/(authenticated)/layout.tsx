@@ -1,7 +1,9 @@
-import { auth, currentUser } from "@repo/auth/server";
+import { auth } from "@repo/auth/server";
 import { SidebarProvider } from "@repo/design-system/components/ui/sidebar";
 import { showBetaFeature } from "@repo/feature-flags";
 import { secure } from "@repo/security";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 import type { ReactNode } from "react";
 import { env } from "@/env";
 import { NotificationsProvider } from "./components/notifications-provider";
@@ -16,16 +18,18 @@ const AppLayout = async ({ children }: AppLayoutProperties) => {
     await secure(["CATEGORY:PREVIEW"]);
   }
 
-  const user = await currentUser();
-  const { redirectToSignIn } = await auth();
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
   const betaFeature = await showBetaFeature();
 
-  if (!user) {
-    return redirectToSignIn();
+  if (!session?.user) {
+    redirect("/sign-in");
   }
 
   return (
-    <NotificationsProvider userId={user.id}>
+    <NotificationsProvider userId={session.user.id}>
       <SidebarProvider>
         <GlobalSidebar>
           {betaFeature && (

@@ -1,0 +1,22 @@
+import { cn } from "@repo/design-system/lib/utils";
+import type React from "react";
+
+export function ScrollFadeEffect({
+  className,
+  orientation = "vertical",
+  ...props
+}: React.ComponentProps<"div"> & {
+  orientation?: "horizontal" | "vertical";
+}) {
+  return (
+    <div
+      className={cn(
+        "data-[orientation=horizontal]:overflow-x-auto data-[orientation=vertical]:overflow-y-auto",
+        "data-[orientation=horizontal]:scroll-fade-effect-x data-[orientation=vertical]:scroll-fade-effect-y",
+        className
+      )}
+      data-orientation={orientation}
+      {...props}
+    />
+  );
+}

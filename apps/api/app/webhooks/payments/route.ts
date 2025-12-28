@@ -1,5 +1,5 @@
 import { analytics } from "@repo/analytics/server";
-import { clerkClient } from "@repo/auth/server";
+import { database, eq, user } from "@repo/database";
 import { parseError } from "@repo/observability/error";
 import { log } from "@repo/observability/log";
 import type { Stripe } from "@repo/payments";
@@ -9,14 +9,13 @@ import { NextResponse } from "next/server";
 import { env } from "@/env";
 
 const getUserFromCustomerId = async (customerId: string) => {
-  const clerk = await clerkClient();
-  const users = await clerk.users.getUserList();
+  const [foundUser] = await database
+    .select()
+    .from(user)
+    .where(eq(user.stripeCustomerId, customerId))
+    .limit(1);
 
-  const user = users.data.find(
-    (currentUser) => currentUser.privateMetadata.stripeCustomerId === customerId
-  );
-
-  return user;
+  return foundUser;
 };
 
 const handleCheckoutSessionCompleted = async (
@@ -28,15 +27,15 @@ const handleCheckoutSessionCompleted = async (
 
   const customerId =
     typeof data.customer === "string" ? data.customer : data.customer.id;
-  const user = await getUserFromCustomerId(customerId);
+  const foundUser = await getUserFromCustomerId(customerId);
 
-  if (!user) {
+  if (!foundUser) {
     return;
   }
 
   analytics.capture({
     event: "User Subscribed",
-    distinctId: user.id,
+    distinctId: foundUser.id,
   });
 };
 
@@ -49,15 +48,15 @@ const handleSubscriptionScheduleCanceled = async (
 
   const customerId =
     typeof data.customer === "string" ? data.customer : data.customer.id;
-  const user = await getUserFromCustomerId(customerId);
+  const foundUser = await getUserFromCustomerId(customerId);
 
-  if (!user) {
+  if (!foundUser) {
     return;
   }
 
   analytics.capture({
     event: "User Unsubscribed",
-    distinctId: user.id,
+    distinctId: foundUser.id,
   });
 };
 

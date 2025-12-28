@@ -2,8 +2,7 @@
   "recommendations": [
     "biomejs.biome",
     "bradlc.vscode-tailwindcss",
-    "Prisma.prisma",
-    "unifiedjs.vscode-mdx",
+        "unifiedjs.vscode-mdx",
     "mikestead.dotenv",
     "christian-kohler.npm-intellisense"
   ]

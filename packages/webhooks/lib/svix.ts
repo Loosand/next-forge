@@ -1,5 +1,6 @@
 import "server-only";
 import { auth } from "@repo/auth/server";
+import { headers } from "next/headers";
 import { Svix } from "svix";
 import { keys } from "../keys";
 
@@ -11,21 +12,26 @@ export const send = async (eventType: string, payload: object) => {
   }
 
   const svix = new Svix(svixToken);
-  const { orgId } = await auth();
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
 
-  if (!orgId) {
+  if (!session?.user) {
     return;
   }
 
-  return svix.message.create(orgId, {
+  // Use user ID as the app identifier
+  const appId = session.user.id;
+
+  return svix.message.create(appId, {
     eventType,
     payload: {
       eventType,
       ...payload,
     },
     application: {
-      name: orgId,
-      uid: orgId,
+      name: appId,
+      uid: appId,
     },
   });
 };
@@ -36,16 +42,21 @@ export const getAppPortal = async () => {
   }
 
   const svix = new Svix(svixToken);
-  const { orgId } = await auth();
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
 
-  if (!orgId) {
+  if (!session?.user) {
     return;
   }
 
-  return svix.authentication.appPortalAccess(orgId, {
+  // Use user ID as the app identifier
+  const appId = session.user.id;
+
+  return svix.authentication.appPortalAccess(appId, {
     application: {
-      name: orgId,
-      uid: orgId,
+      name: appId,
+      uid: appId,
     },
   });
 };

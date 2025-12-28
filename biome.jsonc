@@ -1,6 +1,71 @@
 {
   "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
   "extends": ["ultracite/core", "ultracite/react", "ultracite/next"],
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true
+  },
+  "formatter": {
+    "enabled": true,
+    "indentStyle": "space",
+    "indentWidth": 2
+  },
+  "linter": {
+    "domains": {
+      "next": "recommended",
+      "react": "recommended"
+    },
+    "rules": {
+      "nursery": {
+        "noShadow": "off",
+        "noLeakedRender": "off"
+      },
+      "performance": {
+        "noNamespaceImport": "off",
+        "noImgElement": "info",
+        "noBarrelFile": "off",
+        "useTopLevelRegex": "off"
+      },
+      "correctness": {
+        "useExhaustiveDependencies": "off",
+        "noUnusedFunctionParameters": "off",
+        "useImageSize": "off"
+      },
+      "complexity": {
+        "noExcessiveCognitiveComplexity": {
+          "level": "info",
+          "options": {
+            "maxAllowedComplexity": 20
+          }
+        }
+      },
+      "suspicious": {
+        "noAlert": "off",
+        "noDocumentCookie": "off",
+        "noShadowRestrictedNames": "off",
+        "noEmptyBlockStatements": "off"
+      },
+      "a11y": {
+        "useSemanticElements": "off",
+        "noLabelWithoutControl": "off",
+        "noSvgWithoutTitle": "info"
+      },
+      "style": {
+        "noNonNullAssertion": "off",
+        "useBlockStatements": "off",
+        "useConsistentTypeDefinitions": "info",
+        "noNestedTernary": "info"
+      }
+    }
+  },
+  "assist": {
+    "actions": {
+      "source": {
+        "organizeImports": "on"
+      }
+    }
+  },
   "javascript": {
     "globals": ["Liveblocks"]
   },
