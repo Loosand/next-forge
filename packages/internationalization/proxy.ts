@@ -15,9 +15,23 @@ const I18nMiddleware = createI18nMiddleware({
     const negotiator = new Negotiator({ headers });
     const acceptedLanguages = negotiator.languages();
 
-    const matchedLocale = matchLocale(acceptedLanguages, locales, "en");
+    // Filter out invalid locale values like '*' and empty strings
+    const validLanguages = acceptedLanguages.filter(
+      (lang) => lang && lang !== "*" && lang.trim() !== ""
+    );
 
-    return matchedLocale;
+    // If no valid languages, return default
+    if (validLanguages.length === 0) {
+      return "en";
+    }
+
+    try {
+      const matchedLocale = matchLocale(validLanguages, locales, "en");
+      return matchedLocale;
+    } catch (_error) {
+      // If locale matching fails, return default
+      return "en";
+    }
   },
 });
 
