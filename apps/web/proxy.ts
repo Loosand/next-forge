@@ -1,4 +1,3 @@
-import { authMiddleware } from "@repo/auth/proxy";
 import { internationalizationMiddleware } from "@repo/internationalization/proxy";
 import { parseError } from "@repo/observability/error";
 import { secure } from "@repo/security";
@@ -8,7 +7,8 @@ import {
   securityMiddleware,
 } from "@repo/security/proxy";
 import { createNEMO } from "@rescale/nemo";
-import { type NextProxy, type NextRequest, NextResponse } from "next/server";
+import type { NextFetchEvent, NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 import { env } from "@/env";
 
 export const config = {
@@ -51,17 +51,17 @@ const composedMiddleware = createNEMO(
   }
 );
 
-// Clerk middleware wraps other middleware in its callback
-export default authMiddleware(async (_auth, request, event) => {
+// Web app is public - compose middleware without auth enforcement
+export default async function middleware(
+  request: NextRequest,
+  event: NextFetchEvent
+) {
   // Run security headers first
   const headersResponse = securityHeaders();
 
   // Then run composed middleware (i18n + arcjet)
-  const middlewareResponse = await composedMiddleware(
-    request as unknown as NextRequest,
-    event
-  );
+  const middlewareResponse = await composedMiddleware(request, event);
 
   // Return middleware response if it exists, otherwise headers response
   return middlewareResponse || headersResponse;
-}) as unknown as NextProxy;
+}
