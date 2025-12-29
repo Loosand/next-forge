@@ -15,6 +15,13 @@ export function authMiddleware(
   ) {
     const sessionCookie = getSessionCookie(request);
     const authorized = Boolean(sessionCookie);
+    const { pathname } = request.nextUrl;
+
+    // Public routes that don't require authentication
+    const publicRoutes = ["/sign-in", "/sign-up"];
+    const isPublicRoute = publicRoutes.some((route) =>
+      pathname.startsWith(route)
+    );
 
     if (middlewareFn) {
       const response = await middlewareFn(
@@ -27,8 +34,14 @@ export function authMiddleware(
       }
     }
 
-    if (!sessionCookie) {
+    // Redirect to sign-in only if not authenticated and not on a public route
+    if (!(sessionCookie || isPublicRoute)) {
       return NextResponse.redirect(new URL("/sign-in", request.url));
+    }
+
+    // Redirect to home if authenticated and trying to access auth pages
+    if (sessionCookie && isPublicRoute) {
+      return NextResponse.redirect(new URL("/", request.url));
     }
 
     return NextResponse.next();
