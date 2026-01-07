@@ -4,10 +4,10 @@
   "main": "./index.ts",
   "types": "./index.ts",
   "scripts": {
-    "generate": "drizzle-kit generate",
-    "migrate": "drizzle-kit migrate",
-    "push": "drizzle-kit push",
-    "studio": "drizzle-kit studio",
+    "generate": "dotenv -e ../../.env -- drizzle-kit generate",
+    "migrate": "dotenv -e ../../.env -- drizzle-kit migrate",
+    "push": "dotenv -e ../../.env -- drizzle-kit push",
+    "studio": "dotenv -e ../../.env -- drizzle-kit studio",
     "clean": "git clean -xdf .cache .turbo dist node_modules",
     "typecheck": "tsc --noEmit --emitDeclarationOnly false"
   },

@@ -18,10 +18,10 @@
     "boundaries": "turbo boundaries",
     "bump-deps": "npx npm-check-updates --deep -u -x recharts && pnpm install",
     "bump-ui": "npx shadcn@latest add --all --overwrite -c packages/design-system",
-    "db:generate": "cd packages/database && npx drizzle-kit generate",
-    "db:migrate": "cd packages/database && npx drizzle-kit migrate",
-    "db:push": "cd packages/database && npx drizzle-kit push",
-    "db:studio": "cd packages/database && npx drizzle-kit studio",
+    "db:generate": "cd packages/database && pnpm generate",
+    "db:migrate": "cd packages/database && pnpm migrate",
+    "db:push": "cd packages/database && pnpm push",
+    "db:studio": "cd packages/database && pnpm studio",
     "clean": "git clean -xdf node_modules"
   },
   "devDependencies": {
