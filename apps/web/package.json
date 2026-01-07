@@ -2,9 +2,9 @@
   "name": "web",
   "private": true,
   "scripts": {
-    "dev": "next dev -p 3001",
-    "build": "next build",
-    "start": "next start",
+    "dev": "dotenv -e ../../.env -e .env -- next dev -p 3001",
+    "build": "dotenv -e ../../.env -e .env -- next build",
+    "start": "dotenv -e ../../.env -e .env -- next start",
     "analyze": "ANALYZE=true npm run build",
     "clean": "git clean -xdf .cache .turbo dist node_modules",
     "typecheck": "tsc --noEmit --emitDeclarationOnly false"
@@ -44,6 +44,7 @@
     "@types/node": "24.10.1",
     "@types/react": "19.2.7",
     "@types/react-dom": "19.2.3",
+    "dotenv-cli": "^11.0.0",
     "tailwindcss": "^4.1.17",
     "typescript": "^5.9.3"
   }
