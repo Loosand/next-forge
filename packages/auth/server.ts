@@ -7,6 +7,8 @@ import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
 import { keys } from "./keys";
 
+const env = keys();
+
 export const auth = betterAuth({
   database: drizzleAdapter(database, {
     provider: "pg",
@@ -17,7 +19,9 @@ export const auth = betterAuth({
       verification: schema.verification,
     },
   }),
-  secret: keys().BETTER_AUTH_SECRET,
+  secret: env.BETTER_AUTH_SECRET,
+  baseURL: env.BETTER_AUTH_URL,
+  trustedOrigins: env.BETTER_AUTH_URL ? [env.BETTER_AUTH_URL] : [],
   emailAndPassword: {
     enabled: true,
   },
@@ -25,15 +29,15 @@ export const auth = betterAuth({
   databaseHooks: {
     user: {
       create: {
-        after: async (user) => {},
+        after: async () => {},
       },
       update: {
-        after: async (user) => {},
+        after: async () => {},
       },
     },
     session: {
       create: {
-        after: async (session) => {},
+        after: async () => {},
       },
     },
   },
