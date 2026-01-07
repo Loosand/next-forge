@@ -24,7 +24,7 @@ const securityHeaders = env.FLAGS_SECRET
 // Custom middleware for Arcjet security checks
 const arcjetMiddleware = async (request: NextRequest) => {
   if (!env.ARCJET_KEY) {
-    return;
+    return NextResponse.next();
   }
 
   try {
@@ -41,6 +41,8 @@ const arcjetMiddleware = async (request: NextRequest) => {
     const message = parseError(error);
     return NextResponse.json({ error: message }, { status: 403 });
   }
+
+  return NextResponse.next();
 };
 
 // Compose non-Clerk middleware with Nemo
