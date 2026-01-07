@@ -26,6 +26,46 @@ const config: StorybookConfig = {
     options: {},
   },
   staticDirs: ["../public"],
+
+  // Fix $RefreshSig$ error in production builds
+  webpackFinal: (webpackConfig, { configType }) => {
+    if (configType === "PRODUCTION") {
+      // Remove ReactRefreshPlugin
+      webpackConfig.plugins = webpackConfig.plugins?.filter(
+        (plugin) => plugin?.constructor?.name !== "ReactRefreshPlugin"
+      );
+
+      // Remove react-refresh babel plugin from all loaders
+      const rules = webpackConfig.module?.rules ?? [];
+      for (const rule of rules) {
+        if (rule && typeof rule === "object" && rule.use) {
+          const uses = Array.isArray(rule.use) ? rule.use : [rule.use];
+          for (const use of uses) {
+            if (
+              use &&
+              typeof use === "object" &&
+              "options" in use &&
+              use.options &&
+              typeof use.options === "object" &&
+              "plugins" in use.options &&
+              Array.isArray(use.options.plugins)
+            ) {
+              use.options.plugins = use.options.plugins.filter(
+                (plugin: unknown) => {
+                  const pluginName = Array.isArray(plugin) ? plugin[0] : plugin;
+                  return (
+                    typeof pluginName !== "string" ||
+                    !pluginName.includes("react-refresh")
+                  );
+                }
+              );
+            }
+          }
+        }
+      }
+    }
+    return webpackConfig;
+  },
 };
 
 export default config;
