@@ -2,8 +2,8 @@
   "name": "docs",
   "private": true,
   "scripts": {
-    "dev": "mintlify dev --port 3004",
-    "lint": "mintlify broken-links"
+    "dev": "pnpm exec mintlify dev --port 3004",
+    "lint": "pnpm exec mintlify broken-links"
   },
   "devDependencies": {
     "typescript": "^5.9.3"
