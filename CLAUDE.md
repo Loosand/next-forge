@@ -6,30 +6,62 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 next-forge is a production-grade Turborepo template for Next.js applications. It's a comprehensive SaaS starter kit providing authentication, payments, database, email, and more out of the box.
 
+For detailed documentation about this project, see the docs in `docs/content/docs/`.
+
 ## Commands
+
+### Root-level Commands
 
 ```bash
 # Development
-pnpm dev              # Start all apps concurrently
-pnpm build            # Build all packages and apps
+pnpm dev              # Start all apps concurrently (excludes docs, cms, storybook)
+pnpm build            # Build all packages and apps (runs tests first)
 pnpm test             # Run Vitest across monorepo
 
 # Code Quality
 pnpm check            # Lint and format check (ultracite/biome)
 pnpm fix              # Auto-fix formatting issues
 
-# Database
-pnpm migrate          # Format schema, generate client, push to DB
+# Database (shortcuts to packages/database commands)
+pnpm db:generate      # Generate Drizzle client from schema
+pnpm db:migrate       # Run migrations
+pnpm db:push          # Push schema changes to database
+pnpm db:studio        # Open Drizzle Studio
 
-# Other
+# Maintenance
 pnpm analyze          # Bundle size analysis
-pnpm clean            # Deep clean node_modules
+pnpm clean            # Deep clean all node_modules
+pnpm bump-deps        # Update all dependencies (except recharts)
+pnpm bump-ui          # Update all shadcn/ui components
 ```
 
-Individual app development (from app directory):
+### Individual App Development
+
+From within an app directory (e.g., `apps/app/`):
 ```bash
-pnpm dev              # Start single app
+pnpm dev              # Start single app (uses dotenv to load ../../.env and .env)
+pnpm build            # Build app
+pnpm test             # Run app tests
 pnpm typecheck        # TypeScript check
+```
+
+### Database Package Commands
+
+From `packages/database/`:
+```bash
+pnpm generate         # Generate Drizzle client from schema.ts
+pnpm migrate          # Run migrations
+pnpm push             # Push schema to database (faster than migrate)
+pnpm studio           # Open Drizzle Studio UI
+```
+
+### Worker App
+
+The worker app (`apps/worker/`) processes background jobs via BullMQ:
+```bash
+pnpm dev              # Watch mode with tsx
+pnpm build            # Build to dist/
+pnpm start            # Run built worker
 ```
 
 ## Architecture
@@ -38,22 +70,35 @@ pnpm typecheck        # TypeScript check
 
 ```
 apps/
-├── app/       # Main application (port 3000) - shadcn/ui
+├── app/       # Main application (port 3000) - Next.js App Router with shadcn/ui
 ├── web/       # Marketing site (port 3001) - Tailwind/TWBlocks
-├── api/       # API server (port 3002) - webhooks, cron
-├── docs/      # Documentation - Fumadocs
+├── api/       # API server (port 3002) - webhooks, cron jobs, health checks
+├── docs/      # Documentation (port 3004) - Mintlify
 ├── email/     # Email preview - React Email
-└── storybook/ # Component development
+├── storybook/ # Component development
+├── studio/    # Database studio
+└── worker/    # Background job processor - BullMQ workers
 
 packages/
-├── design-system/   # shadcn/ui components
-├── database/        # Drizzle ORM with Neon adapter
-├── auth/            # Clerk authentication
-├── payments/        # Stripe integration
-├── analytics/       # Google Analytics + PostHog
-├── observability/   # Sentry + logging
-├── security/        # Arcjet + rate limiting
-└── ...              # 20+ shared packages
+├── design-system/      # shadcn/ui components
+├── database/           # Drizzle ORM with PostgreSQL/Neon
+├── auth/               # Better Auth authentication
+├── payments/           # Stripe integration with @stripe/agent-toolkit
+├── analytics/          # Google Analytics + PostHog
+├── observability/      # Sentry + BetterStack logging
+├── security/           # Arcjet security + rate limiting
+├── email/              # Resend email integration
+├── webhooks/           # Svix webhook handling
+├── collaboration/      # Liveblocks real-time features
+├── notifications/      # Knock notifications
+├── feature-flags/      # Vercel feature flags
+├── queue/              # BullMQ + Redis queue
+├── cms/                # Basehub CMS
+├── seo/                # SEO metadata utilities
+├── storage/            # File storage
+├── internationalization/ # i18n support
+├── ai/                 # AI utilities
+└── ...                 # Additional shared packages
 ```
 
 ### Environment Variable Pattern
@@ -63,9 +108,9 @@ Each package exports a `keys()` function with Zod-validated env vars:
 ```typescript
 // packages/auth/keys.ts
 export const keys = () => createEnv({
-  server: { CLERK_SECRET_KEY: z.string().startsWith("sk_").optional() },
-  client: { NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: z.string().startsWith("pk_").optional() },
-  runtimeEnv: { /* ... */ },
+  server: { BETTER_AUTH_SECRET: z.string().min(16) },
+  client: {},
+  runtimeEnv: { BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET },
 });
 ```
 
@@ -95,11 +140,3 @@ All internal packages use `@repo/*` namespace with workspace protocol:
 ```json
 "@repo/design-system": "workspace:*"
 ```
-
-## Key Conventions
-
-- **Biome** for formatting and linting (not Prettier/ESLint)
-- **Vitest** for testing
-- **t3-oss/env-nextjs** for type-safe environment variables
-- Route groups for auth: `(authenticated)/` and `(unauthenticated)/`
-- Each package has `server-only` imports where needed to prevent client leakage
