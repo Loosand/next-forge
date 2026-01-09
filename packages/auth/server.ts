@@ -26,6 +26,16 @@ export const auth = betterAuth({
     enabled: true,
   },
   plugins: [nextCookies()],
+  session: {
+    cookieCache: {
+      enabled: true,
+      maxAge: 60 * 60 * 24 * 14,
+    },
+    // just use a custom cookie name in development to avoid conflicts with other local projects
+    ...(env.NODE_ENV === "development" && {
+      cookieName: "next-forge.session",
+    }),
+  },
   databaseHooks: {
     user: {
       create: {
