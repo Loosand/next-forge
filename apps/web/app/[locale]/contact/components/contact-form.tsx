@@ -40,6 +40,7 @@ export const ContactForm = ({ dictionary }: ContactFormProps) => {
             {dictionary.web.contact.hero.benefits.map((benefit, index) => (
               <div
                 className="flex flex-row items-start gap-6 text-left"
+                // biome-ignore lint/suspicious/noArrayIndexKey: "Static index key is safe"
                 key={index}
               >
                 <Check className="mt-2 h-4 w-4 text-primary" />

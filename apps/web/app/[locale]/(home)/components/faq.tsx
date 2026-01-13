@@ -39,6 +39,7 @@ export const FAQ = ({ dictionary }: FAQProps) => (
         </div>
         <Accordion className="w-full" collapsible type="single">
           {dictionary.web.home.faq.items.map((item, index) => (
+            // biome-ignore lint/suspicious/noArrayIndexKey: "Static index key is safe"
             <AccordionItem key={index} value={`index-${index}`}>
               <AccordionTrigger>{item.question}</AccordionTrigger>
               <AccordionContent>{item.answer}</AccordionContent>

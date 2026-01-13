@@ -64,7 +64,7 @@ const LegalPage = async ({ params }: LegalPageProperties) => {
             <h1 className="scroll-m-20 text-balance font-extrabold text-4xl tracking-tight lg:text-5xl">
               {page._title}
             </h1>
-            <p className="text-balance leading-7 [&:not(:first-child)]:mt-6">
+            <p className="not-first:mt-6 text-balance leading-7">
               {page.description}
             </p>
             <div className="mt-16 flex flex-col items-start gap-8 sm:flex-row">

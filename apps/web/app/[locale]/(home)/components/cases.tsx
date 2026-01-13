@@ -43,6 +43,7 @@ export const Cases = ({ dictionary }: CasesProps) => {
           <Carousel className="w-full" setApi={setApi}>
             <CarouselContent>
               {Array.from({ length: 15 }).map((_, index) => (
+                // biome-ignore lint/suspicious/noArrayIndexKey: "Static index key is safe"
                 <CarouselItem className="basis-1/4 lg:basis-1/6" key={index}>
                   <div className="flex aspect-square items-center justify-center rounded-md bg-muted p-6">
                     <span className="text-sm">Logo {index + 1}</span>

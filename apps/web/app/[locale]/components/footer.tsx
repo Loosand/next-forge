@@ -6,6 +6,7 @@ import { env } from "@/env";
 
 export const Footer = () => (
   <Feed queries={[legal.postsQuery]}>
+    {/** biome-ignore lint/suspicious/useAwait: "Server Actions must be async" */}
     {async ([data]) => {
       "use server";
 

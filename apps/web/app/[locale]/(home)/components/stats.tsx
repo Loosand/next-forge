@@ -24,6 +24,7 @@ export const Stats = ({ dictionary }: StatsProps) => (
             {dictionary.web.home.stats.items.map((item, index) => (
               <div
                 className="flex flex-col justify-between gap-0 rounded-md border p-6"
+                // biome-ignore lint/suspicious/noArrayIndexKey: "Static index key is safe"
                 key={index}
               >
                 {Number.parseFloat(item.delta) > 0 ? (

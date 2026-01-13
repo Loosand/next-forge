@@ -49,6 +49,7 @@ export const Testimonials = ({ dictionary }: TestimonialsProps) => {
           <Carousel className="w-full" setApi={setApi}>
             <CarouselContent>
               {dictionary.web.home.testimonials.items.map((item, index) => (
+                // biome-ignore lint/suspicious/noArrayIndexKey: "Static index key is safe"
                 <CarouselItem className="lg:basis-1/2" key={index}>
                   <div className="flex aspect-video h-full flex-col justify-between rounded-md bg-muted p-6 lg:col-span-2">
                     <User className="h-8 w-8 stroke-1" />
