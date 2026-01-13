@@ -4,9 +4,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "tsx watch src/index.ts",
-    "start": "node dist/index.js",
-    "build": "tsup src/index.ts --format esm --dts",
+    "dev": "bun --env-file=../../.env --watch src/index.ts",
+    "start": "bun --env-file=../../.env src/index.ts",
+    "build": "bun build src/index.ts --outdir dist --target bun",
     "clean": "git clean -xdf .cache .turbo dist node_modules",
     "typecheck": "tsc --noEmit --emitDeclarationOnly false"
   },
@@ -19,9 +19,8 @@
   },
   "devDependencies": {
     "@repo/typescript-config": "workspace:*",
+    "@types/bun": "latest",
     "@types/node": "24.10.1",
-    "tsup": "^8.4.0",
-    "tsx": "^4.19.4",
     "typescript": "^5.9.3"
   }
 }

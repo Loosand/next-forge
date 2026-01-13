@@ -2,10 +2,10 @@
   "name": "app",
   "private": true,
   "scripts": {
-    "dev": "dotenv -e ../../.env -e .env -- next dev -p 3000",
-    "build": "dotenv -e ../../.env -e .env -- next build",
-    "start": "dotenv -e ../../.env -e .env -- next start",
-    "analyze": "ANALYZE=true npm run build",
+    "dev": "bun --env-file=../../.env --env-file=.env next dev -p 3000",
+    "build": "bun --env-file=../../.env --env-file=.env next build",
+    "start": "bun --env-file=../../.env --env-file=.env next start",
+    "analyze": "ANALYZE=true bun run build",
     "test": "NODE_ENV=test vitest run",
     "clean": "git clean -xdf .cache .turbo dist node_modules",
     "typecheck": "tsc --noEmit --emitDeclarationOnly false"
@@ -44,9 +44,7 @@
     "@types/react": "19.2.7",
     "@types/react-dom": "19.2.3",
     "@vitejs/plugin-react": "^5.1.1",
-    "dotenv-cli": "^11.0.0",
     "jsdom": "^27.2.0",
-    "tailwindcss": "^4.1.17",
     "typescript": "^5.9.3",
     "vitest": "^4.0.15"
   }

@@ -3,9 +3,9 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "dev": "dotenv -e ../../.env -- basehub dev",
-    "build": "dotenv -e ../../.env -- basehub build",
-    "analyze": "dotenv -e ../../.env -- basehub",
+    "dev": "bun --env-file=../../.env basehub dev",
+    "build": "bun --env-file=../../.env basehub build",
+    "analyze": "bun --env-file=../../.env basehub",
     "clean": "git clean -xdf .cache .turbo dist node_modules",
     "typecheck": "tsc --noEmit --emitDeclarationOnly false"
   },

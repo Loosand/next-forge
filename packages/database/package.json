@@ -4,10 +4,10 @@
   "main": "./index.ts",
   "types": "./index.ts",
   "scripts": {
-    "generate": "dotenv -e ../../.env -- drizzle-kit generate",
-    "migrate": "dotenv -e ../../.env -- drizzle-kit migrate",
-    "push": "dotenv -e ../../.env -- drizzle-kit push",
-    "studio": "dotenv -e ../../.env -- drizzle-kit studio",
+    "generate": "bun --env-file=../../.env drizzle-kit generate",
+    "migrate": "bun --env-file=../../.env drizzle-kit migrate",
+    "push": "bun --env-file=../../.env drizzle-kit push",
+    "studio": "bun --env-file=../../.env drizzle-kit studio",
     "clean": "git clean -xdf .cache .turbo dist node_modules",
     "typecheck": "tsc --noEmit --emitDeclarationOnly false"
   },

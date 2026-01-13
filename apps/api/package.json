@@ -2,11 +2,10 @@
   "name": "api",
   "private": true,
   "scripts": {
-    "dev": "concurrently \"npm:next\" \"npm:stripe\"",
-    "next": "dotenv -e ../../.env -e .env -- next dev -p 3002",
-    "build": "dotenv -e ../../.env -e .env -- next build",
-    "start": "dotenv -e ../../.env -e .env -- next start",
-    "analyze": "ANALYZE=true npm run build",
+    "dev": "bun --env-file=../../.env --env-file=.env next dev -p 3002",
+    "build": "bun --env-file=../../.env --env-file=.env next build",
+    "start": "bun --env-file=../../.env --env-file=.env next start",
+    "analyze": "ANALYZE=true bun run build",
     "test": "NODE_ENV=test vitest run",
     "stripe": "stripe listen --forward-to localhost:3002/webhooks/payments",
     "clean": "git clean -xdf .cache .turbo dist node_modules",
@@ -37,7 +36,6 @@
     "@types/react-dom": "19.2.3",
     "@vitejs/plugin-react": "^5.1.1",
     "concurrently": "^9.2.1",
-    "dotenv-cli": "^11.0.0",
     "typescript": "^5.9.3",
     "vitest": "^4.0.15"
   }
