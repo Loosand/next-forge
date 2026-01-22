@@ -9,7 +9,7 @@
   ],
   "scripts": {
     "build": "turbo build",
-    "dev": "turbo dev --filter=!docs --filter=!@repo/cms --filter=!storybook --ui=stream",
+    "dev": "turbo dev --filter=!docs --filter=!@repo/cms --filter=!storybook",
     "check": "bunx ultracite@latest check",
     "fix": "bunx ultracite@latest fix",
     "test": "turbo test",
