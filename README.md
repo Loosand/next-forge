@@ -28,8 +28,7 @@ next-forge is built around five core principles:
 
 Experience next-forge in action:
 
-- [Web](https://demo.next-forge.com) — Marketing website
-- [App](https://app.demo.next-forge.com) — Main application
+- [App](https://demo.next-forge.com) — Main application (includes marketing pages and authenticated app)
 - [Storybook](https://storybook.demo.next-forge.com) — Component library
 - [API](https://api.demo.next-forge.com/health) — API health check
 
@@ -39,8 +38,7 @@ next-forge comes with batteries included:
 
 ### Apps
 
-- **Web** — Marketing site built with Tailwind CSS and TWBlocks
-- **App** — Main application with authentication and database integration
+- **App** — Main application with authentication, database integration, and marketing pages
 - **API** — RESTful API with health checks and monitoring
 - **Docs** — Documentation site powered by Mintlify
 - **Email** — Email templates with React Email
@@ -98,8 +96,7 @@ next-forge uses a monorepo structure managed by Turborepo:
 ```
 next-forge/
 ├── apps/           # Deployable applications
-│   ├── web/        # Marketing website (port 3001)
-│   ├── app/        # Main application (port 3000)
+│   ├── app/        # Main application (port 3000) - includes app and marketing pages
 │   ├── api/        # API server
 │   ├── docs/       # Documentation
 │   ├── email/      # Email templates

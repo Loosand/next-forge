@@ -3,13 +3,18 @@ title: App
 description: How the main application works in next-forge.
 ---
 
-<Tip>The `app` application runs on port 3000. We recommend deploying it to `app.{yourdomain}.com`.</Tip>
+<Tip>The `app` application runs on port 3000 and includes both authenticated app pages and public marketing pages.</Tip>
 
-next-forge exports the main app from the `apps/app` directory. It is designed to be run on a subdomain of your choice, and is used to run the main user-facing application.
+next-forge exports the main app from the `apps/app` directory. It combines the authenticated application and public marketing site in a single Next.js application using route groups.
 
 ## Overview
 
-The `app` application is the main user-facing application built on [Next.js](https://nextjs.org). It is designed to be a starting point for your own unique projects, containing all the core functionality you need.
+The `app` application is the main user-facing application built on [Next.js](https://nextjs.org). It includes:
+- **Marketing Pages** (`(marketing)` route group): Public pages like homepage, blog, pricing, and contact
+- **Authenticated App** (`(app)` route group): Protected pages requiring user login
+- **Auth Pages** (`(auth)` route group): Sign-in and sign-up flows
+
+All pages support internationalization through the `[locale]` dynamic segment.
 
 ## Features
 

@@ -55,14 +55,6 @@ pnpm push             # Push schema to database (faster than migrate)
 pnpm studio           # Open Drizzle Studio UI
 ```
 
-### Worker App
-
-The worker app (`apps/worker/`) processes background jobs via BullMQ:
-```bash
-pnpm dev              # Watch mode with tsx
-pnpm build            # Build to dist/
-pnpm start            # Run built worker
-```
 
 ## Architecture
 
@@ -71,13 +63,12 @@ pnpm start            # Run built worker
 ```
 apps/
 ├── app/       # Main application (port 3000) - Next.js App Router with shadcn/ui
-├── web/       # Marketing site (port 3001) - Tailwind/TWBlocks
+│              # Includes both authenticated app pages and public marketing pages
 ├── api/       # API server (port 3002) - webhooks, cron jobs, health checks
 ├── docs/      # Documentation (port 3004) - Mintlify
 ├── email/     # Email preview - React Email
 ├── storybook/ # Component development
-├── studio/    # Database studio
-└── worker/    # Background job processor - BullMQ workers
+└── studio/    # Database studio
 
 packages/
 ├── design-system/      # shadcn/ui components
@@ -92,7 +83,6 @@ packages/
 ├── collaboration/      # Liveblocks real-time features
 ├── notifications/      # Knock notifications
 ├── feature-flags/      # Vercel feature flags
-├── queue/              # BullMQ + Redis queue
 ├── cms/                # Basehub CMS
 ├── seo/                # SEO metadata utilities
 ├── storage/            # File storage
