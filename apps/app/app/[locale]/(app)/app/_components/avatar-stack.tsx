@@ -17,16 +17,18 @@ type PresenceAvatarProps = {
 };
 
 const PresenceAvatar = ({ info }: PresenceAvatarProps) => (
-  <Tooltip delayDuration={0}>
-    <TooltipTrigger>
-      <Avatar className="h-7 w-7 bg-secondary ring-1 ring-background">
-        <AvatarImage alt={info?.name} src={info?.avatar} />
-        <AvatarFallback className="text-xs">
-          {info?.name?.slice(0, 2)}
-        </AvatarFallback>
-      </Avatar>
-    </TooltipTrigger>
-    <TooltipContent collisionPadding={4}>
+  <Tooltip>
+    <TooltipTrigger
+      render={
+        <Avatar className="h-7 w-7 bg-secondary ring-1 ring-background">
+          <AvatarImage alt={info?.name} src={info?.avatar} />
+          <AvatarFallback className="text-xs">
+            {info?.name?.slice(0, 2)}
+          </AvatarFallback>
+        </Avatar>
+      }
+    />
+    <TooltipContent align="center" side="right">
       <p>{info?.name ?? "Unknown"}</p>
     </TooltipContent>
   </Tooltip>

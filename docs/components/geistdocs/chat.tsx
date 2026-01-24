@@ -204,28 +204,24 @@ const ChatInner = () => {
           <ButtonGroup orientation="horizontal">
             <CopyChat messages={messages} />
             <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
+              <TooltipTrigger render={<Button
                   disabled={messages.length === 0}
                   onClick={handleClearChat}
                   size="icon-sm"
                   variant="ghost"
                 >
                   <Trash className="size-3.5" />
-                </Button>
-              </TooltipTrigger>
+                </Button>} />
               <TooltipContent>Clear chat</TooltipContent>
             </Tooltip>
             <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
+              <TooltipTrigger render={<Button
                   onClick={() => setIsOpen(false)}
                   size="icon-sm"
                   variant="ghost"
                 >
                   <ChevronRightIcon className="size-3.5" />
-                </Button>
-              </TooltipTrigger>
+                </Button>} />
               <TooltipContent>Close chat</TooltipContent>
             </Tooltip>
           </ButtonGroup>

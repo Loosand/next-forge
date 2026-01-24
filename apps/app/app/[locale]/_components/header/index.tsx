@@ -59,8 +59,8 @@ export const Header = ({ dictionary }: HeaderProps) => {
               {navigationItems.map((item) => (
                 <NavigationMenuItem key={item.title}>
                   {item.href ? (
-                    <NavigationMenuLink asChild>
-                      <Button asChild variant="ghost">
+                    <NavigationMenuLink>
+                      <Button variant="ghost">
                         <Link href={item.href}>{item.title}</Link>
                       </Button>
                     </NavigationMenuLink>
@@ -78,7 +78,7 @@ export const Header = ({ dictionary }: HeaderProps) => {
                                 {item.description}
                               </p>
                             </div>
-                            <Button asChild className="mt-10" size="sm">
+                            <Button className="mt-10" size="sm">
                               <Link href="/contact">
                                 {dictionary.web.global.primaryCta}
                               </Link>
@@ -122,7 +122,7 @@ export const Header = ({ dictionary }: HeaderProps) => {
           <p className="whitespace-nowrap font-semibold">next-forge</p>
         </div>
         <div className="flex w-full justify-end gap-4">
-          <Button asChild className="hidden md:inline" variant="ghost">
+          <Button className="hidden md:inline" variant="ghost">
             <Link href="/contact">{dictionary.web.header.contact}</Link>
           </Button>
           <div className="hidden border-r md:inline" />
@@ -132,12 +132,12 @@ export const Header = ({ dictionary }: HeaderProps) => {
           <div className="hidden md:inline">
             <ModeToggle />
           </div>
-          <Button asChild className="hidden md:inline" variant="outline">
+          <Button className="hidden md:inline" variant="outline">
             <Link href={`${env.NEXT_PUBLIC_APP_URL}/sign-in`}>
               {dictionary.web.header.signIn}
             </Link>
           </Button>
-          <Button asChild>
+          <Button>
             <Link href={`${env.NEXT_PUBLIC_APP_URL}/sign-up`}>
               {dictionary.web.header.signUp}
             </Link>

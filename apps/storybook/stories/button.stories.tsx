@@ -3,7 +3,23 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { Loader2, Mail } from "lucide-react";
 
 /**
- * Displays a button or a component that looks like a button.
+ * Buttons allow users to perform actions with a single click or tap.
+ * Built on Base UI Button component.
+ *
+ * ## API Reference
+ *
+ * ### Button Props (Base UI)
+ * - `disabled`: boolean - 禁用按钮
+ * - `focusableWhenDisabled`: boolean - 禁用时是否仍可获得焦点（适用于加载状态）
+ * - `className`: string | ((state) => string) - CSS 类名或状态函数
+ * - `render`: ReactElement | ((props) => ReactElement) - 自定义渲染元素
+ * - 继承所有标准 button 元素属性（type, onClick, onFocus 等）
+ *
+ * ### Custom Props (Design System)
+ * - `variant`: 'default' | 'outline' | 'secondary' | 'ghost' | 'destructive' | 'link' - 按钮样式变体
+ * - `size`: 'default' | 'xs' | 'sm' | 'lg' | 'icon' | 'icon-xs' | 'icon-sm' | 'icon-lg' - 按钮尺寸
+ *
+ * @see https://base-ui.com/react/components/button
  */
 const meta = {
   title: "ui/Button",
@@ -12,6 +28,55 @@ const meta = {
   argTypes: {
     children: {
       control: "text",
+      description: "按钮内容",
+    },
+    variant: {
+      control: { type: "select" },
+      options: [
+        "default",
+        "outline",
+        "secondary",
+        "ghost",
+        "destructive",
+        "link",
+      ],
+      description: "按钮样式变体",
+      table: {
+        defaultValue: { summary: "default" },
+      },
+    },
+    size: {
+      control: { type: "select" },
+      options: [
+        "default",
+        "xs",
+        "sm",
+        "lg",
+        "icon",
+        "icon-xs",
+        "icon-sm",
+        "icon-lg",
+      ],
+      description: "按钮尺寸",
+      table: {
+        defaultValue: { summary: "default" },
+      },
+    },
+    disabled: {
+      control: { type: "boolean" },
+      description: "禁用按钮",
+      table: {
+        type: { summary: "boolean" },
+        defaultValue: { summary: "false" },
+      },
+    },
+    focusableWhenDisabled: {
+      control: { type: "boolean" },
+      description: "禁用时是否仍可获得焦点（用于加载状态保持焦点）",
+      table: {
+        type: { summary: "boolean" },
+        defaultValue: { summary: "false" },
+      },
     },
   },
   parameters: {
@@ -84,19 +149,20 @@ export const Link: Story = {
 };
 
 /**
- * Add the `disabled` prop to a button to prevent interactions and add a
- * loading indicator, such as a spinner, to signify an in-progress action.
+ * 加载状态的按钮，使用 `focusableWhenDisabled` 保持焦点。
+ * 这对于点击后进入加载状态的按钮很有用，防止焦点丢失。
  */
 export const Loading: Story = {
   render: (args) => (
     <Button {...args}>
       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-      Button
+      Loading...
     </Button>
   ),
   args: {
     ...Outline.args,
     disabled: true,
+    focusableWhenDisabled: true,
   },
 };
 

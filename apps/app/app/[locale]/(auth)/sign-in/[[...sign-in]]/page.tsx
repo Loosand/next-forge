@@ -14,9 +14,6 @@ type SignInPageProps = {
   readonly params: Promise<{ locale: string }>;
 };
 
-const SignInPage = async ({ params }: SignInPageProps) => {
-  const { locale } = await params;
-  return <SignIn />;
-};
+const SignInPage = async ({ params }: SignInPageProps) => <SignIn />;
 
 export default SignInPage;

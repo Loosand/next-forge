@@ -43,6 +43,7 @@ const meta = {
       </CardHeader>
       <CardContent className="grid gap-4">
         {notifications.map((notification, index) => (
+          // biome-ignore lint/suspicious/noArrayIndexKey: index is unique
           <div className="flex items-center gap-4" key={index}>
             <BellRing className="size-6" />
             <div>

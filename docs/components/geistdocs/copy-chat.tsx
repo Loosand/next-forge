@@ -40,16 +40,18 @@ export const CopyChat = ({ messages }: { messages: UIMessage[] }) => {
 
   return (
     <Tooltip>
-      <TooltipTrigger asChild>
-        <Button
-          disabled={messages.length === 0}
-          onClick={handleCopyChat}
-          size="icon-sm"
-          variant="ghost"
-        >
-          <Icon className="size-3.5" />
-        </Button>
-      </TooltipTrigger>
+      <TooltipTrigger
+        render={
+          <Button
+            disabled={messages.length === 0}
+            onClick={handleCopyChat}
+            size="icon-sm"
+            variant="ghost"
+          >
+            <Icon className="size-3.5" />
+          </Button>
+        }
+      />
       <TooltipContent>Copy chat</TooltipContent>
     </Tooltip>
   );

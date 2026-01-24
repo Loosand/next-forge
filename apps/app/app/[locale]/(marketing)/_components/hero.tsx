@@ -21,12 +21,12 @@ export const Hero = ({ dictionary }: HeroProps) => (
           </p>
         </div>
         <div className="flex flex-row gap-3">
-          <Button asChild className="gap-4" size="lg" variant="outline">
+          <Button className="gap-4" size="lg" variant="outline">
             <Link href="/contact">
               Get in touch <PhoneCall className="h-4 w-4" />
             </Link>
           </Button>
-          <Button asChild className="gap-4" size="lg">
+          <Button className="gap-4" size="lg">
             <Link href={env.NEXT_PUBLIC_APP_URL}>
               Sign up <MoveRight className="h-4 w-4" />
             </Link>

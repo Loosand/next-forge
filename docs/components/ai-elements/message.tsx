@@ -94,7 +94,7 @@ export const MessageAction = ({
     return (
       <TooltipProvider>
         <Tooltip>
-          <TooltipTrigger asChild>{button}</TooltipTrigger>
+          <TooltipTrigger render={button} />
           <TooltipContent>
             <p>{tooltip}</p>
           </TooltipContent>
@@ -375,11 +375,9 @@ export function MessageAttachment({
       ) : (
         <>
           <Tooltip>
-            <TooltipTrigger asChild>
-              <div className="flex size-full shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+            <TooltipTrigger render={<div className="flex size-full shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
                 <PaperclipIcon className="size-4" />
-              </div>
-            </TooltipTrigger>
+              </div>} />
             <TooltipContent>
               <p>{attachmentLabel}</p>
             </TooltipContent>

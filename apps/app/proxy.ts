@@ -1,4 +1,7 @@
 import { authMiddleware } from "@repo/auth/proxy";
+import languine from "@repo/internationalization/languine.json" with {
+  type: "json",
+};
 import { internationalizationMiddleware } from "@repo/internationalization/proxy";
 import { parseError } from "@repo/observability/error";
 import { secure } from "@repo/security";
@@ -11,6 +14,9 @@ import { createNEMO } from "@rescale/nemo";
 import type { NextFetchEvent, NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { env } from "./env";
+
+// 从配置文件读取所有支持的语言列表
+const locales = [languine.locale.source, ...languine.locale.targets];
 
 export const config = {
   matcher: [
@@ -80,8 +86,19 @@ export default async function middleware(
     return headersResponse;
   }
 
+  // 跳过 API 路由的国际化处理
+  // API 路由不需要多语言支持，直接返回安全响应头
+  if (pathname.startsWith("/api/") || pathname.startsWith("/trpc/")) {
+    // 仍然运行 Arcjet 安全检查
+    const arcjetResponse = await arcjetMiddleware(request);
+    if (arcjetResponse) {
+      return arcjetResponse;
+    }
+    return headersResponse;
+  }
+
   // 第二步：运行组合中间件（国际化 + Arcjet 安全检查）
-  // i18n 中间件会自动跳过 API 路由，所以不需要手动检查
+  // 仅对非 API 路由运行
   const composedResponse = await composedMiddleware(request, event);
 
   // 如果国际化或安全检查返回了响应（比如重定向或拦截），就用它
@@ -102,7 +119,9 @@ export default async function middleware(
   // 检查当前路径是否为公开路由
   // 1. 去掉开头的语言前缀（比如 /zh/blog → /blog）
   // 2. 检查是否匹配公开路由列表
-  const pathnameWithoutLocale = pathname.replace(/^\/(en|zh|de|es|fr)(\/|$)/, "/");
+  // 动态构建语言前缀的正则表达式（从配置文件读取）
+  const localePattern = new RegExp(`^\\/(${locales.join("|")})(/|$)`);
+  const pathnameWithoutLocale = pathname.replace(localePattern, "/");
   const isPublicRoute =
     pathname.startsWith("/api/") || // API 路由始终公开
     publicRoutes.some((route) => {

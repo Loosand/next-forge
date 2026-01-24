@@ -62,7 +62,7 @@ export const ContactForm = ({ dictionary }: ContactFormProps) => {
                   {dictionary.web.contact.hero.form.date}
                 </Label>
                 <Popover>
-                  <PopoverTrigger asChild>
+                  <PopoverTrigger>
                     <Button
                       className={cn(
                         "w-full max-w-sm justify-start text-left font-normal",

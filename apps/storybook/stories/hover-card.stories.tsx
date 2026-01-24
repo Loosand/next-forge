@@ -42,7 +42,10 @@ export const Default: Story = {};
  */
 export const Instant: Story = {
   args: {
-    openDelay: 0,
-    closeDelay: 0,
+    defaultOpen: false,
+    open: false,
+    onOpenChange: (open) => {
+      console.log("open", open);
+    },
   },
 };
