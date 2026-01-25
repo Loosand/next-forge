@@ -1,3 +1,5 @@
+"use server";
+
 import { database, eq, user } from "@repo/database";
 import type { RegistrationMeta } from "@repo/database/types";
 import { getTrackingData } from "./cookies";
