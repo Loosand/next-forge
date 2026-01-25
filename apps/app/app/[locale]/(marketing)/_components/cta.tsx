@@ -21,18 +21,18 @@ export const CTA = ({ dictionary }: CTAProps) => (
           </p>
         </div>
         <div className="flex flex-row gap-4">
-          <Button className="gap-4" variant="outline">
-            <Link href="/contact">
+          <Link href="/contact">
+            <Button className="gap-4" variant="outline">
               {dictionary.web.global.primaryCta}{" "}
               <PhoneCall className="h-4 w-4" />
-            </Link>
-          </Button>
-          <Button className="gap-4">
-            <Link href={env.NEXT_PUBLIC_APP_URL}>
+            </Button>
+          </Link>
+          <Link href={env.NEXT_PUBLIC_APP_URL}>
+            <Button className="gap-4">
               {dictionary.web.global.secondaryCta}{" "}
               <MoveRight className="h-4 w-4" />
-            </Link>
-          </Button>
+            </Button>
+          </Link>
         </div>
       </div>
     </div>

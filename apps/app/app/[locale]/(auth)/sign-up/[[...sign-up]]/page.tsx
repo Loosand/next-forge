@@ -8,7 +8,11 @@ const SignUp = dynamic(() =>
   import("@repo/auth/components/sign-up").then((mod) => mod.SignUp)
 );
 
-export const metadata: Metadata = createMetadata({ title, description });
+export const metadata: Metadata = createMetadata({
+  title,
+  description,
+  path: "/sign-up",
+});
 
 type SignUpPageProps = {
   readonly params: Promise<{ locale: string }>;

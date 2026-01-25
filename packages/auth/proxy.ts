@@ -1,6 +1,7 @@
 import { getSessionCookie } from "better-auth/cookies";
 import type { NextFetchEvent, NextRequest } from "next/server";
 import { NextResponse } from "next/server";
+import { setTrackingCookie } from "./utils/save-tracking-cookies";
 
 export function authMiddleware(
   middlewareFn?: (
@@ -24,26 +25,35 @@ export function authMiddleware(
     );
 
     if (middlewareFn) {
-      const response = await middlewareFn(
+      const customResponse = await middlewareFn(
         { req: request, authorized },
         request,
         event
       );
-      if (response?.headers?.get("Location")) {
-        return response;
+      if (customResponse?.headers?.get("Location")) {
+        return customResponse;
       }
     }
 
+    // 创建响应对象
+    let response: NextResponse;
+
     // Redirect to sign-in only if not authenticated and not on a public route
     if (!(sessionCookie || isPublicRoute)) {
-      return NextResponse.redirect(new URL("/sign-in", request.url));
+      response = NextResponse.redirect(new URL("/sign-in", request.url));
     }
-
     // Redirect to home if authenticated and trying to access auth pages
-    if (sessionCookie && isPublicRoute) {
-      return NextResponse.redirect(new URL("/", request.url));
+    else if (sessionCookie && isPublicRoute) {
+      response = NextResponse.redirect(new URL("/", request.url));
+    }
+    // 正常访问
+    else {
+      response = NextResponse.next();
     }
 
-    return NextResponse.next();
+    // 设置追踪 Cookie（如果需要）
+    setTrackingCookie(request, response);
+
+    return response;
   };
 }

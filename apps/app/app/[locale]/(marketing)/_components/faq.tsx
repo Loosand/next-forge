@@ -28,12 +28,12 @@ export const FAQ = ({ dictionary }: FAQProps) => (
               </p>
             </div>
             <div className="">
-              <Button className="gap-4" variant="outline">
-                <Link href="/contact">
+              <Link href="/contact">
+                <Button className="gap-4" variant="outline">
                   {dictionary.web.home.faq.cta}{" "}
                   <PhoneCall className="h-4 w-4" />
-                </Link>
-              </Button>
+                </Button>
+              </Link>
             </div>
           </div>
         </div>

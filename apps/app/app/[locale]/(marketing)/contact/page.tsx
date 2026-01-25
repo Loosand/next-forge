@@ -15,7 +15,10 @@ export const generateMetadata = async ({
   const { locale } = await params;
   const dictionary = await getDictionary(locale);
 
-  return createMetadata(dictionary.web.contact.meta);
+  return createMetadata({
+    ...dictionary.web.contact.meta,
+    path: "/contact",
+  });
 };
 
 const Contact = async ({ params }: ContactProps) => {

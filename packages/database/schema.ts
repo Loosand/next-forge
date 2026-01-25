@@ -1,4 +1,11 @@
-import { boolean, pgTable, serial, text, timestamp } from "drizzle-orm/pg-core";
+import {
+  boolean,
+  jsonb,
+  pgTable,
+  serial,
+  text,
+  timestamp,
+} from "drizzle-orm/pg-core";
 
 export const page = pgTable("page", {
   id: serial("id").primaryKey(),
@@ -12,6 +19,8 @@ export const user = pgTable("user", {
   emailVerified: boolean("email_verified").notNull().default(false),
   image: text("image"),
   stripeCustomerId: text("stripe_customer_id"),
+  registrationMeta: jsonb("registration_meta"),
+  registrationSource: text("registration_source"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });

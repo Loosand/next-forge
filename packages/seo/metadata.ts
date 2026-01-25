@@ -5,6 +5,7 @@ type MetadataGenerator = Omit<Metadata, "description" | "title"> & {
   title: string;
   description: string;
   image?: string;
+  path?: string;
 };
 
 const applicationName = "next-forge";
@@ -21,6 +22,7 @@ export const createMetadata = ({
   title,
   description,
   image,
+  path,
   ...properties
 }: MetadataGenerator): Metadata => {
   const parsedTitle = `${title} | ${applicationName}`;

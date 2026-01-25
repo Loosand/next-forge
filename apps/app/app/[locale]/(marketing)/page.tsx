@@ -22,7 +22,10 @@ export const generateMetadata = async ({
   const { locale } = await params;
   const dictionary = await getDictionary(locale);
 
-  return createMetadata(dictionary.web.home.meta);
+  return createMetadata({
+    ...dictionary.web.home.meta,
+    path: "/",
+  });
 };
 
 const Home = async ({ params }: HomeProps) => {
