@@ -1,7 +1,7 @@
 import { getSessionCookie } from "better-auth/cookies";
 import type { NextFetchEvent, NextRequest } from "next/server";
 import { NextResponse } from "next/server";
-import { setTrackingCookie } from "./utils/save-tracking-cookies";
+import { TRACKING_COOKIE } from "./utils/cookies";
 
 export function authMiddleware(
   middlewareFn?: (
@@ -18,6 +18,26 @@ export function authMiddleware(
     const authorized = Boolean(sessionCookie);
     const { pathname } = request.nextUrl;
 
+    // 📊 日志：追踪所有请求的 referer 信息
+    const referer = request.headers.get("referer");
+    const userAgent = request.headers.get("user-agent");
+    const country = request.headers.get("x-vercel-ip-country");
+    const ip =
+      request.headers.get("x-real-ip") ||
+      request.headers.get("x-forwarded-for");
+
+    const existingTrackingCookie = request.cookies.get(TRACKING_COOKIE);
+
+    console.log("🔍 [Proxy] Request Info:", {
+      pathname,
+      referer: referer || "(direct)",
+      country,
+      ip,
+      userAgent: userAgent?.substring(0, 50),
+      hasTrackingCookie: !!existingTrackingCookie,
+      trackingCookieValue: existingTrackingCookie?.value,
+    });
+
     // Public routes that don't require authentication
     const publicRoutes = ["/sign-in", "/sign-up", "/api/auth"];
     const isPublicRoute = publicRoutes.some((route) =>
@@ -25,35 +45,26 @@ export function authMiddleware(
     );
 
     if (middlewareFn) {
-      const customResponse = await middlewareFn(
+      const response = await middlewareFn(
         { req: request, authorized },
         request,
         event
       );
-      if (customResponse?.headers?.get("Location")) {
-        return customResponse;
+      if (response?.headers?.get("Location")) {
+        return response;
       }
     }
 
-    // 创建响应对象
-    let response: NextResponse;
-
     // Redirect to sign-in only if not authenticated and not on a public route
     if (!(sessionCookie || isPublicRoute)) {
-      response = NextResponse.redirect(new URL("/sign-in", request.url));
+      return NextResponse.redirect(new URL("/sign-in", request.url));
     }
+
     // Redirect to home if authenticated and trying to access auth pages
-    else if (sessionCookie && isPublicRoute) {
-      response = NextResponse.redirect(new URL("/", request.url));
-    }
-    // 正常访问
-    else {
-      response = NextResponse.next();
+    if (sessionCookie && isPublicRoute) {
+      return NextResponse.redirect(new URL("/", request.url));
     }
 
-    // 设置追踪 Cookie（如果需要）
-    setTrackingCookie(request, response);
-
-    return response;
+    return NextResponse.next();
   };
 }
