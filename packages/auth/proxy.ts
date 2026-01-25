@@ -1,7 +1,6 @@
 import { getSessionCookie } from "better-auth/cookies";
 import type { NextFetchEvent, NextRequest } from "next/server";
 import { NextResponse } from "next/server";
-import { TRACKING_COOKIE } from "./utils/cookies";
 
 export function authMiddleware(
   middlewareFn?: (
@@ -17,26 +16,6 @@ export function authMiddleware(
     const sessionCookie = getSessionCookie(request);
     const authorized = Boolean(sessionCookie);
     const { pathname } = request.nextUrl;
-
-    // 📊 日志：追踪所有请求的 referer 信息
-    const referer = request.headers.get("referer");
-    const userAgent = request.headers.get("user-agent");
-    const country = request.headers.get("x-vercel-ip-country");
-    const ip =
-      request.headers.get("x-real-ip") ||
-      request.headers.get("x-forwarded-for");
-
-    const existingTrackingCookie = request.cookies.get(TRACKING_COOKIE);
-
-    console.log("🔍 [Proxy] Request Info:", {
-      pathname,
-      referer: referer || "(direct)",
-      country,
-      ip,
-      userAgent: userAgent?.substring(0, 50),
-      hasTrackingCookie: !!existingTrackingCookie,
-      trackingCookieValue: existingTrackingCookie?.value,
-    });
 
     // Public routes that don't require authentication
     const publicRoutes = ["/sign-in", "/sign-up", "/api/auth"];

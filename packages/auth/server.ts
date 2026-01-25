@@ -6,7 +6,6 @@ import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
 import { keys } from "./keys";
-import { trackRegistrationUser } from "./utils/track-registration-user";
 
 const env = keys();
 
@@ -45,16 +44,8 @@ export const auth = betterAuth({
   databaseHooks: {
     user: {
       create: {
-        // biome-ignore lint/suspicious/useAwait: trackRegistrationUser is async
-        after: async (createdUser) => {
-          // biome-ignore lint/complexity/noVoid: must void
-          void trackRegistrationUser(createdUser.id).catch((error) => {
-            console.log(
-              "[Database Hook After] Failed to save registration tracking:",
-              error
-            );
-          });
-        },
+        after: async () => {},
+        before: async () => {},
       },
       update: {
         after: async () => {},
