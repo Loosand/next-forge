@@ -1,0 +1,15 @@
+{
+  "name": "@repo/logger",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "clean": "git clean -xdf .cache .turbo dist node_modules",
+    "typecheck": "tsc --noEmit --emitDeclarationOnly false"
+  },
+  "dependencies": {
+    "signale": "^1.4.0"
+  },
+  "devDependencies": {
+    "@types/signale": "^1.4.7"
+  }
+}

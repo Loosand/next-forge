@@ -28,6 +28,7 @@
     "ARCJET",
     "basehub",
     "bshb",
+    "bunx",
     "Embla",
     "formatjs",
     "Genql",
@@ -36,6 +37,9 @@
     "localematcher",
     "Nemo",
     "neondatabase",
-    "shiki"
+    "shiki",
+    "signale",
+    "Turborepo",
+    "ultracite"
   ]
 }
