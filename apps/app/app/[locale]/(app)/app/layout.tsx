@@ -19,7 +19,7 @@ const AppLayout = async ({ children }: AppLayoutProperties) => {
   });
 
   if (!session?.user) {
-    redirect("/sign-in");
+    redirect("/auth/sign-in");
   }
 
   return <div>{children}</div>;

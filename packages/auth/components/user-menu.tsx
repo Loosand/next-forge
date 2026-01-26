@@ -13,7 +13,7 @@ export const UserMenu = ({ showName }: UserMenuProps) => {
 
   const handleSignOut = async () => {
     await signOut();
-    router.push("/sign-in");
+    router.push("/auth/sign-in");
     router.refresh();
   };
 

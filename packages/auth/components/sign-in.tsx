@@ -87,7 +87,7 @@ export const SignIn = () => {
       </form>
       <p className="text-center text-muted-foreground text-sm">
         Don&apos;t have an account?{" "}
-        <a className="text-primary hover:underline" href="/sign-up">
+        <a className="text-primary hover:underline" href="/auth/sign-up">
           Sign up
         </a>
       </p>

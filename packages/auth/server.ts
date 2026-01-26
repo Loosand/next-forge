@@ -1,13 +1,21 @@
+/** biome-ignore-all lint/style/noNestedTernary: better-auth plugins */
 import "server-only";
 
+import { render } from "@react-email/components";
 import { database } from "@repo/database";
 import * as schema from "@repo/database/schema";
+import { resend } from "@repo/email";
+import { keys as emailKeys } from "@repo/email/keys";
+import { OTPTemplate } from "@repo/email/templates/otp";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
+import { emailOTP } from "better-auth/plugins";
 import { keys } from "./keys";
+import { saveTrackingData } from "./utils/save-tracking-data";
 
 const env = keys();
+const email = emailKeys();
 
 export const auth = betterAuth({
   database: drizzleAdapter(database, {
@@ -29,12 +37,43 @@ export const auth = betterAuth({
     : [],
   emailAndPassword: {
     enabled: true,
+    requireEmailVerification: true,
   },
-  plugins: [nextCookies()],
+  _plugins: [
+    nextCookies(),
+    emailOTP({
+      otpLength: 6,
+      expiresIn: 300, // 5 minutes
+      sendVerificationOnSignUp: true,
+      async sendVerificationOTP({ email: userEmail, otp, type }) {
+        const subject =
+          type === "sign-in"
+            ? "Sign in to your account"
+            : type === "email-verification"
+              ? "Verify your email address"
+              : "Reset your password";
+
+        const html = await render(OTPTemplate({ otp, type }));
+
+        await resend.emails.send({
+          from: email.RESEND_FROM,
+          to: userEmail,
+          subject,
+          html,
+        });
+      },
+    }),
+  ],
+  get plugins() {
+    return this._plugins;
+  },
+  set plugins(value) {
+    this._plugins = value;
+  },
   session: {
     cookieCache: {
       enabled: true,
-      maxAge: 60 * 60 * 24 * 14,
+      maxAge: 60 * 60 * 24 * 30,
     },
     // just use a custom cookie name in development to avoid conflicts with other local projects
     ...(env.NODE_ENV === "development" && {
@@ -44,22 +83,21 @@ export const auth = betterAuth({
   databaseHooks: {
     user: {
       create: {
-        after: async () => {},
-        before: async () => {},
+        // biome-ignore lint/suspicious/useAwait: trackRegistrationUser is async
+        after: async (createdUser) => {
+          // biome-ignore lint/complexity/noVoid: must void
+          void saveTrackingData(createdUser.id).catch((error) => {
+            console.log(
+              "[Database Hook After] Failed to save registration tracking:",
+              error
+            );
+          });
+        },
       },
       update: {
         after: async () => {},
       },
     },
-    session: {
-      create: {
-        after: async () => {},
-      },
-    },
-  },
-  hooks: {
-    before: async () => {},
-    after: async () => {},
   },
 });
 

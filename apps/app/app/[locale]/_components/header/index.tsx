@@ -133,12 +133,12 @@ export const Header = ({ dictionary }: HeaderProps) => {
             <ModeToggle />
           </div>
           <Button className="hidden md:inline" variant="outline">
-            <Link href={`${env.NEXT_PUBLIC_APP_URL}/sign-in`}>
+            <Link href={`${env.NEXT_PUBLIC_APP_URL}/auth/sign-in`}>
               {dictionary.web.header.signIn}
             </Link>
           </Button>
           <Button>
-            <Link href={`${env.NEXT_PUBLIC_APP_URL}/sign-up`}>
+            <Link href={`${env.NEXT_PUBLIC_APP_URL}/auth/sign-up`}>
               {dictionary.web.header.signUp}
             </Link>
           </Button>

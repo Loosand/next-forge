@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "shadcn": {
+      "args": ["shadcn@latest", "mcp"],
+      "command": "npx"
+    },
+    "trigger": {
+      "args": ["trigger.dev@latest", "mcp"],
+      "command": "npx"
+    },
+    "Sentry": {
+      "url": "https://mcp.sentry.dev/mcp/loosand/javascript-nextjs"
+    }
+  }
+}

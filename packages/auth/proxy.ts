@@ -18,7 +18,12 @@ export function authMiddleware(
     const { pathname } = request.nextUrl;
 
     // Public routes that don't require authentication
-    const publicRoutes = ["/sign-in", "/sign-up", "/api/auth"];
+    const publicRoutes = [
+      "/auth/sign-in",
+      "/auth/sign-up",
+      "/auth/verify-email",
+      "/api/auth",
+    ];
     const isPublicRoute = publicRoutes.some((route) =>
       pathname.startsWith(route)
     );
@@ -36,7 +41,7 @@ export function authMiddleware(
 
     // Redirect to sign-in only if not authenticated and not on a public route
     if (!(sessionCookie || isPublicRoute)) {
-      return NextResponse.redirect(new URL("/sign-in", request.url));
+      return NextResponse.redirect(new URL("/auth/sign-in", request.url));
     }
 
     // Redirect to home if authenticated and trying to access auth pages

@@ -13,6 +13,7 @@
     "dev:app": "cd apps/app && bun run dev",
     "dev:api": "cd apps/api && bun run dev",
     "dev:docs": "cd apps/docs && bun run dev",
+    "dev:email": "cd apps/email && bun run dev",
     "dev:storybook": "cd apps/storybook && bun run dev",
     "check": "bunx ultracite@latest check",
     "fix": "bunx ultracite@latest fix",

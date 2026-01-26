@@ -212,7 +212,7 @@ export function authMiddleware(
     }
 
     if (!sessionCookie) {
-      return NextResponse.redirect(new URL("/sign-in", request.url));
+      return NextResponse.redirect(new URL("/auth/sign-in", request.url));
     }
 
     return NextResponse.next();
@@ -253,7 +253,7 @@ const session = await auth.api.getSession({
   headers: await headers(), // from next/headers
 });
 if (!session?.user) {
-  return redirect('/sign-in'); // from next/navigation
+  return redirect('/auth/sign-in'); // from next/navigation
 }
 // do something with session.user
 ```
