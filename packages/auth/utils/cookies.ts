@@ -1,15 +1,38 @@
+/**
+ * [INPUT]: NextRequest/NextResponse - Next.js 请求响应对象; cookies() - Next.js cookies API
+ * [OUTPUT]: getTrackingCookies() - RegistrationMeta | null; setTrackingCookies() - void; 常量导出
+ * [POS]: 位于 /packages/auth/utils 的 Cookie 管理工具，在 middleware 和注册流程中使用
+ *
+ * [PROTOCOL]:
+ * 1. 一旦本文件的 Cookie 策略、追踪逻辑变更，必须同步更新此 Header
+ * 2. 更新后必须上浮检查 /packages/auth/utils/.folder.md 的描述是否依然准确
+ * 3. 修改 COOKIE_OPTIONS 时，必须确保符合安全最佳实践和隐私政策
+ * 4. 新增追踪字段时，必须同时更新 @repo/database/types 中的 RegistrationMeta 类型
+ */
+
 import type { RegistrationMeta } from "@repo/database/types";
 import { cookies } from "next/headers";
 import type { NextRequest, NextResponse } from "next/server";
 
 /**
  * Cookie 名称常量
+ * 使用下划线前缀表示内部使用的 Cookie
  */
 const TRACKING_COOKIE = "_tracking_data";
+
+/**
+ * Cookie 有效期：7 天
+ * 足够覆盖大部分用户从访问到注册的时间窗口
+ */
 const COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
 
 /**
- * Cookie 配置
+ * Cookie 安全配置
+ * - httpOnly: 防止 JavaScript 访问（XSS 防护）
+ * - secure: 生产环境强制 HTTPS（开发环境允许 HTTP）
+ * - sameSite: "lax" 平衡安全性和功能性
+ * - path: "/" 全站可用
+ * - maxAge: 7 天有效期
  */
 const COOKIE_OPTIONS = {
   httpOnly: true,
@@ -21,6 +44,11 @@ const COOKIE_OPTIONS = {
 
 /**
  * 从 cookies 中获取追踪数据
+ *
+ * 在用户注册时调用，读取首次访问时记录的来源信息。
+ * 用于分析用户来源渠道、落地页效果等。
+ *
+ * @returns RegistrationMeta 对象或 null（如果 Cookie 不存在或解析失败）
  */
 async function getTrackingCookies(): Promise<RegistrationMeta | null> {
   const cookieStore = await cookies();
@@ -33,6 +61,7 @@ async function getTrackingCookies(): Promise<RegistrationMeta | null> {
   try {
     return JSON.parse(trackingRaw) as RegistrationMeta;
   } catch {
+    // JSON 解析失败，返回 null（Cookie 可能被篡改或损坏）
     return null;
   }
 }
