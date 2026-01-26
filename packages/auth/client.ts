@@ -1,17 +1,13 @@
 "use client";
 
+import { emailOTPClient } from "better-auth/client/plugins";
 import { createAuthClient } from "better-auth/react";
 
-export const authClient = createAuthClient();
+export const authClient = createAuthClient({
+  plugins: [emailOTPClient()],
+});
 
-export const {
-  signIn,
-  signOut,
-  signUp,
-  useSession,
-  sendVerificationEmail,
-  verifyEmail,
-} = authClient;
+export const { signIn, signOut, signUp, useSession, emailOtp } = authClient;
 
 export { SignIn } from "./components/sign-in";
 export { SignUp } from "./components/sign-up";

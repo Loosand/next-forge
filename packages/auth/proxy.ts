@@ -39,7 +39,12 @@ export function authMiddleware(
     });
 
     // Public routes that don't require authentication
-    const publicRoutes = ["/auth/sign-in", "/auth/sign-up", "/api/auth"];
+    const publicRoutes = [
+      "/auth/sign-in",
+      "/auth/sign-up",
+      "/auth/verify-email",
+      "/api/auth",
+    ];
     const isPublicRoute = publicRoutes.some((route) =>
       pathname.startsWith(route)
     );

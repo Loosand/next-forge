@@ -27,8 +27,8 @@ export const SignUp = () => {
       if (result.error) {
         setError(result.error.message || "Sign up failed");
       } else {
-        router.push("/");
-        router.refresh();
+        // Redirect to OTP verification page
+        router.push(`/auth/verify-email?email=${encodeURIComponent(email)}`);
       }
     } catch {
       setError("An unexpected error occurred");

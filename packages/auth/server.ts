@@ -1,3 +1,4 @@
+/** biome-ignore-all lint/style/noNestedTernary: better-auth plugins */
 import "server-only";
 
 import { render } from "@react-email/components";
@@ -5,10 +6,11 @@ import { database } from "@repo/database";
 import * as schema from "@repo/database/schema";
 import { resend } from "@repo/email";
 import { keys as emailKeys } from "@repo/email/keys";
-import { VerificationTemplate } from "@repo/email/templates/verification";
+import { OTPTemplate } from "@repo/email/templates/otp";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
+import { emailOTP } from "better-auth/plugins";
 import { keys } from "./keys";
 import { saveTrackingData } from "./utils/save-tracking-data";
 
@@ -36,36 +38,38 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: true,
-    sendVerificationEmail: async ({
-      user,
-      url,
-    }: {
-      user: { email: string };
-      url: string;
-    }) => {
-      const html = await render(VerificationTemplate({ url }));
-      try {
-        const result = await resend.emails.send({
+  },
+  _plugins: [
+    nextCookies(),
+    emailOTP({
+      otpLength: 6,
+      expiresIn: 300, // 5 minutes
+      sendVerificationOnSignUp: true,
+      async sendVerificationOTP({ email: userEmail, otp, type }) {
+        const subject =
+          type === "sign-in"
+            ? "Sign in to your account"
+            : type === "email-verification"
+              ? "Verify your email address"
+              : "Reset your password";
+
+        const html = await render(OTPTemplate({ otp, type }));
+
+        await resend.emails.send({
           from: email.RESEND_FROM,
-          to: user.email,
-          subject: "Verify your email address",
+          to: userEmail,
+          subject,
           html,
         });
-
-        if (result.error) {
-          console.error(
-            "[Auth] Failed to send verification email:",
-            result.error
-          );
-          throw result.error;
-        }
-      } catch (error) {
-        console.error("[Auth] Failed to send verification email:", error);
-        throw error;
-      }
-    },
+      },
+    }),
+  ],
+  get plugins() {
+    return this._plugins;
   },
-  plugins: [nextCookies()],
+  set plugins(value) {
+    this._plugins = value;
+  },
   session: {
     cookieCache: {
       enabled: true,
@@ -95,10 +99,6 @@ export const auth = betterAuth({
       },
     },
   },
-  // hooks: {
-  //   before: async () => {},
-  //   after: async () => {},
-  // },
 });
 
 export type Session = typeof auth.$Infer.Session;
