@@ -1,16 +1,15 @@
 import "server-only";
 
+import { render } from "@react-email/components";
 import { database } from "@repo/database";
 import * as schema from "@repo/database/schema";
 import { resend } from "@repo/email";
 import { keys as emailKeys } from "@repo/email/keys";
 import { VerificationTemplate } from "@repo/email/templates/verification";
-import { render } from "@react-email/components";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
 import { keys } from "./keys";
-import { trackRegistrationUser } from "./utils/track-registration-user";
 
 const env = keys();
 const email = emailKeys();
@@ -66,16 +65,7 @@ export const auth = betterAuth({
   databaseHooks: {
     user: {
       create: {
-        // biome-ignore lint/suspicious/useAwait: trackRegistrationUser is async
-        after: async (createdUser) => {
-          // biome-ignore lint/complexity/noVoid: must void
-          void trackRegistrationUser(createdUser.id).catch((error) => {
-            console.log(
-              "[Database Hook After] Failed to save registration tracking:",
-              error
-            );
-          });
-        },
+        after: async () => {},
       },
       update: {
         after: async () => {},

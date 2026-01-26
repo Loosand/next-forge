@@ -1,5 +1,4 @@
 import { authMiddleware } from "@repo/auth/proxy";
-import { setTrackingCookie } from "@repo/auth/utils/save-tracking-cookies";
 import languine from "@repo/internationalization/languine.json" with {
   type: "json",
 };
@@ -77,7 +76,6 @@ export default async function middleware(
   event: NextFetchEvent
 ) {
   const pathname = request.nextUrl.pathname;
-  const response = NextResponse.next();
 
   // 第一步：添加安全响应头
   const headersResponse = securityHeaders();
@@ -114,8 +112,8 @@ export default async function middleware(
     "/", // 首页
     "/contact", // 联系页面
     "/pricing", // 定价页面
-    "/sign-in", // 登录页面
-    "/sign-up", // 注册页面
+    "/auth/sign-in", // 登录页面
+    "/auth/sign-up", // 注册页面
   ];
 
   // 检查当前路径是否为公开路由
@@ -137,7 +135,6 @@ export default async function middleware(
 
   // 如果是公开路由，跳过登录验证，直接返回
   if (isPublicRoute) {
-    setTrackingCookie(request, response);
     return headersResponse;
   }
 

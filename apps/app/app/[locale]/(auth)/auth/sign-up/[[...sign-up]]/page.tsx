@@ -11,7 +11,7 @@ const SignUp = dynamic(() =>
 export const metadata: Metadata = createMetadata({
   title,
   description,
-  path: "/sign-up",
+  path: "/auth/sign-up",
 });
 
 type SignUpPageProps = {

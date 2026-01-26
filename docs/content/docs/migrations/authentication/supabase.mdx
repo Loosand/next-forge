@@ -196,9 +196,9 @@ export const authMiddleware = async (request: NextRequest) => {
   const { data: { user } } = await supabase.auth.getUser();
 
   // Redirect to sign-in if accessing protected route without authentication
-  if (!user && request.nextUrl.pathname.startsWith('/dashboard')) {
+  if (!user && request.nextUrl.pathname.startsWith('/app')) {
     const url = request.nextUrl.clone();
-    url.pathname = '/sign-in';
+    url.pathname = '/auth/sign-in';
     return NextResponse.redirect(url);
   }
 
