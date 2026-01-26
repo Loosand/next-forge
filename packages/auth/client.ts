@@ -4,7 +4,14 @@ import { createAuthClient } from "better-auth/react";
 
 export const authClient = createAuthClient();
 
-export const { signIn, signOut, signUp, useSession } = authClient;
+export const {
+  signIn,
+  signOut,
+  signUp,
+  useSession,
+  sendVerificationEmail,
+  verifyEmail,
+} = authClient;
 
 export { SignIn } from "./components/sign-in";
 export { SignUp } from "./components/sign-up";

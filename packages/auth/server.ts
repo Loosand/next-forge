@@ -2,6 +2,10 @@ import "server-only";
 
 import { database } from "@repo/database";
 import * as schema from "@repo/database/schema";
+import { resend } from "@repo/email";
+import { keys as emailKeys } from "@repo/email/keys";
+import { VerificationTemplate } from "@repo/email/templates/verification";
+import { render } from "@react-email/components";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
@@ -9,6 +13,7 @@ import { keys } from "./keys";
 import { trackRegistrationUser } from "./utils/track-registration-user";
 
 const env = keys();
+const email = emailKeys();
 
 export const auth = betterAuth({
   database: drizzleAdapter(database, {
@@ -30,12 +35,28 @@ export const auth = betterAuth({
     : [],
   emailAndPassword: {
     enabled: true,
+    requireEmailVerification: true,
+    sendVerificationEmail: async ({
+      user,
+      url,
+    }: {
+      user: { email: string };
+      url: string;
+    }) => {
+      const html = await render(VerificationTemplate({ url }));
+      await resend.emails.send({
+        from: email.RESEND_FROM,
+        to: user.email,
+        subject: "Verify your email address",
+        html,
+      });
+    },
   },
   plugins: [nextCookies()],
   session: {
     cookieCache: {
       enabled: true,
-      maxAge: 60 * 60 * 24 * 14,
+      maxAge: 60 * 60 * 24 * 30,
     },
     // just use a custom cookie name in development to avoid conflicts with other local projects
     ...(env.NODE_ENV === "development" && {
