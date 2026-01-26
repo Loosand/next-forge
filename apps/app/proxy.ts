@@ -1,4 +1,5 @@
 import { authMiddleware } from "@repo/auth/proxy";
+import { setTrackingCookies } from "@repo/auth/utils/cookies";
 import languine from "@repo/internationalization/languine.json" with {
   type: "json",
 };
@@ -76,6 +77,7 @@ export default async function middleware(
   event: NextFetchEvent
 ) {
   const pathname = request.nextUrl.pathname;
+  const response = NextResponse.next();
 
   // 第一步：添加安全响应头
   const headersResponse = securityHeaders();
@@ -135,6 +137,7 @@ export default async function middleware(
 
   // 如果是公开路由，跳过登录验证，直接返回
   if (isPublicRoute) {
+    setTrackingCookies(request, response);
     return headersResponse;
   }
 

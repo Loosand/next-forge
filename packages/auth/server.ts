@@ -10,6 +10,7 @@ import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
 import { keys } from "./keys";
+import { saveTrackingData } from "./utils/save-tracking-data";
 
 const env = keys();
 const email = emailKeys();
@@ -43,12 +44,25 @@ export const auth = betterAuth({
       url: string;
     }) => {
       const html = await render(VerificationTemplate({ url }));
-      await resend.emails.send({
-        from: email.RESEND_FROM,
-        to: user.email,
-        subject: "Verify your email address",
-        html,
-      });
+      try {
+        const result = await resend.emails.send({
+          from: email.RESEND_FROM,
+          to: user.email,
+          subject: "Verify your email address",
+          html,
+        });
+
+        if (result.error) {
+          console.error(
+            "[Auth] Failed to send verification email:",
+            result.error
+          );
+          throw result.error;
+        }
+      } catch (error) {
+        console.error("[Auth] Failed to send verification email:", error);
+        throw error;
+      }
     },
   },
   plugins: [nextCookies()],
@@ -65,22 +79,26 @@ export const auth = betterAuth({
   databaseHooks: {
     user: {
       create: {
-        after: async () => {},
+        // biome-ignore lint/suspicious/useAwait: trackRegistrationUser is async
+        after: async (createdUser) => {
+          // biome-ignore lint/complexity/noVoid: must void
+          void saveTrackingData(createdUser.id).catch((error) => {
+            console.log(
+              "[Database Hook After] Failed to save registration tracking:",
+              error
+            );
+          });
+        },
       },
       update: {
         after: async () => {},
       },
     },
-    session: {
-      create: {
-        after: async () => {},
-      },
-    },
   },
-  hooks: {
-    before: async () => {},
-    after: async () => {},
-  },
+  // hooks: {
+  //   before: async () => {},
+  //   after: async () => {},
+  // },
 });
 
 export type Session = typeof auth.$Infer.Session;

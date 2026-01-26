@@ -2,17 +2,17 @@
 
 import { database, eq, user } from "@repo/database";
 import type { RegistrationMeta } from "@repo/database/types";
-import { getTrackingData } from "./cookies";
+import { getTrackingCookies } from "./cookies";
+import { determineRegistrationSource } from "./determine-registration-source";
 
 /**
- * 保存用户注册时的追踪信息
  * 从 Cookie 中读取 referer 追踪数据并保存到数据库
  *
  * @param userId - 用户ID
  */
-async function trackRegistrationUser(userId: string): Promise<void> {
+async function saveTrackingData(userId: string): Promise<void> {
   try {
-    const trackingData = await getTrackingData();
+    const trackingData = await getTrackingCookies();
 
     if (trackingData) {
       const registrationMeta: RegistrationMeta = {
@@ -35,16 +35,4 @@ async function trackRegistrationUser(userId: string): Promise<void> {
   } catch (_error) {}
 }
 
-/**
- * 根据追踪数据判断注册来源
- * 这个可以先跑一段时间，看看数据情况，再细分
- * 前期数据不会丢失，会被保存至 metadata 中
- */
-function determineRegistrationSource(
-  trackingData: RegistrationMeta
-): string | null {
-  // 未能识别具体来源
-  return null;
-}
-
-export { trackRegistrationUser };
+export { saveTrackingData };
