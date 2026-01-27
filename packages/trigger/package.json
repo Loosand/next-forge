@@ -1,0 +1,26 @@
+{
+  "name": "@repo/trigger",
+  "version": "0.0.0",
+  "private": true,
+  "main": "./index.ts",
+  "types": "./index.ts",
+  "scripts": {
+    "dev": "trigger dev",
+    "deploy": "trigger deploy",
+    "clean": "git clean -xdf .cache .turbo dist node_modules",
+    "typecheck": "tsc --noEmit --emitDeclarationOnly false"
+  },
+  "dependencies": {
+    "@repo/database": "workspace:*",
+    "@repo/logger": "workspace:*",
+    "@t3-oss/env-nextjs": "^0.13.8",
+    "@trigger.dev/sdk": "4.3.3",
+    "zod": "^4.1.13"
+  },
+  "devDependencies": {
+    "@repo/typescript-config": "workspace:*",
+    "@types/node": "24.10.1",
+    "trigger.dev": "4.3.3",
+    "typescript": "^5.9.3"
+  }
+}

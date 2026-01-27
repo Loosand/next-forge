@@ -27,6 +27,8 @@
     "db:migrate": "cd packages/database && bun run migrate",
     "db:push": "cd packages/database && bun run push",
     "db:studio": "cd packages/database && bun run studio",
+    "trigger:dev": "cd packages/trigger && bun run dev",
+    "trigger:deploy": "cd packages/trigger && bun run deploy",
     "clean": "git clean -xdf node_modules"
   },
   "devDependencies": {
@@ -34,10 +36,12 @@
     "@biomejs/biome": "2.3.8",
     "@repo/typescript-config": "workspace:*",
     "@tailwindcss/postcss": "^4.1.17",
+    "@trigger.dev/build": "4.3.3",
     "@turbo/gen": "^2.7.2",
     "@types/node": "^24.10.4",
     "postcss": "^8.5.6",
     "tailwindcss": "^4.1.17",
+    "trigger.dev": "4.3.3",
     "tsup": "^8.5.1",
     "turbo": "^2.7.2",
     "typescript": "^5.9.3",
@@ -54,6 +58,7 @@
   ],
   "dependencies": {
     "@clack/prompts": "^0.11.0",
+    "@trigger.dev/sdk": "4.3.3",
     "commander": "^14.0.2"
   },
   "overrides": {

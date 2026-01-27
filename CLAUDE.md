@@ -10,45 +10,49 @@ next-forge 是一个生产级的 Turborepo Next.js 应用模板。它是一个�
 
 ```bash
 # 开发
-pnpm dev              # 并发启动所有应用（不包括 docs、cms、storybook）
-pnpm build            # 构建所有包和应用（先运行测试）
-pnpm test             # 在整个 monorepo 中运行 Vitest
+bun run dev              # 并发启动所有应用（不包括 docs、cms、storybook）
+bun run build            # 构建所有包和应用（先运行测试）
+bun run test             # 在整个 monorepo 中运行 Vitest
 
 # 代码质量
-pnpm check            # 代码检查和格式检查（ultracite/biome）
-pnpm fix              # 自动修复格式问题
+bun run check            # 代码检查和格式检查（ultracite/biome）
+bun run fix              # 自动修复格式问题
 
 # 数据库（packages/database 命令的快捷方式）
-pnpm db:generate      # 从 schema 生成 Drizzle 客户端
-pnpm db:migrate       # 运行迁移
-pnpm db:push          # 推送 schema 更改到数据库
-pnpm db:studio        # 打开 Drizzle Studio
+bun run db:generate      # 从 schema 生成 Drizzle 客户端
+bun run db:migrate       # 运行迁移
+bun run db:push          # 推送 schema 更改到数据库
+bun run db:studio        # 打开 Drizzle Studio
+
+# 后台任务（Trigger.dev）
+bun run trigger:dev      # 启动 Trigger.dev 本地开发服务器
+bun run trigger:deploy   # 部署任务到 Trigger.dev 云端
 
 # 维护
-pnpm analyze          # Bundle 大小分析
-pnpm clean            # 深度清理所有 node_modules
-pnpm bump-deps        # 更新所有依赖（recharts 除外）
-pnpm bump-ui          # 更新所有 shadcn/ui 组件
+bun run analyze          # Bundle 大小分析
+bun run clean            # 深度清理所有 node_modules
+bun run bump-deps        # 更新所有依赖（recharts 除外）
+bun run bump-ui          # 更新所有 shadcn/ui 组件
 ```
 
 ### 单个应用开发
 
 在应用目录中（例如 `apps/app/`）：
 ```bash
-pnpm dev              # 启动单个应用（使用 dotenv 加载 ../../.env 和 .env）
-pnpm build            # 构建应用
-pnpm test             # 运行应用测试
-pnpm typecheck        # TypeScript 类型检查
+bun run dev              # 启动单个应用（使用 dotenv 加载 ../../.env 和 .env）
+bun run build            # 构建应用
+bun run test             # 运行应用测试
+bun run typecheck        # TypeScript 类型检查
 ```
 
 ### 数据库包命令
 
 在 `packages/database/` 中：
 ```bash
-pnpm generate         # 从 schema.ts 生成 Drizzle 客户端
-pnpm migrate          # 运行迁移
-pnpm push             # 推送 schema 到数据库（比 migrate 快）
-pnpm studio           # 打开 Drizzle Studio UI
+bun run generate         # 从 schema.ts 生成 Drizzle 客户端
+bun run migrate          # 运行迁移
+bun run push             # 推送 schema 到数据库（比 migrate 快）
+bun run studio           # 打开 Drizzle Studio UI
 ```
 
 
@@ -83,6 +87,7 @@ packages/
 ├── storage/            # 文件存储
 ├── internationalization/ # 国际化支持
 ├── logger/             # 统一日志输出（环境感知：服务端 signale / 客户端 console）
+├── trigger/            # Trigger.dev v4 后台任务队列（异步任务、定时任务）
 ├── ai/                 # AI 工具
 └── ...                 # 其他共享包
 ```
@@ -125,4 +130,24 @@ if (env.ANALYZE === "true") nextConfig = withAnalyzer(nextConfig);
 所有内部包使用 `@repo/*` 命名空间和 workspace 协议：
 ```json
 "@repo/design-system": "workspace:*"
+```
+
+### 后台任务（Trigger.dev）
+
+配置文件 `trigger.config.ts` 和任务文件都放在 `packages/trigger/` 目录：
+
+```
+packages/trigger/
+├── trigger.config.ts   # Trigger.dev 配置
+├── tasks/              # 任务定义目录
+│   └── hello-world.ts
+└── index.ts            # 导出入口
+```
+
+```typescript
+// 在应用中触发任务
+import { helloWorldTask } from "@repo/trigger";
+
+const handle = await helloWorldTask.trigger({ name: "User" });
+const result = await handle.wait(); // 可选：等待结果
 ```

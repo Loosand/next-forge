@@ -64,6 +64,7 @@ next-forge comes with batteries included:
 - **Storage** — File upload and management
 - **Internationalization** — Multi-language support
 - **Notifications** — In-app notification system
+- **Trigger** — Quene system
 
 ## Getting Started
 
