@@ -19,7 +19,7 @@ export const helloWorldTask = task({
     logger.info("Starting hello world task", { name });
 
     // 模拟一些异步工作
-    await wait.for({ seconds: 1 });
+    await wait.for({ seconds: 5 });
 
     const message = `Hello, ${name}!`;
 
