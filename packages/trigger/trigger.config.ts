@@ -12,7 +12,7 @@
 import { defineConfig } from "@trigger.dev/sdk/v3";
 
 export default defineConfig({
-  project: "proj_vjupbisyrwtjmsxefqrk",
+  project: "proj_tpthokekueinijtowhel",
   runtime: "bun",
   logLevel: "log",
   // The max compute seconds a task is allowed to run. If the task run exceeds this duration, it will be stopped.
