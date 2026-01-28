@@ -79,15 +79,15 @@ export function EvlogDemo() {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex flex-wrap gap-3">
-            <Button onClick={testGet} disabled={loading}>
+            <Button disabled={loading} onClick={testGet}>
               GET Request
             </Button>
-            <Button onClick={testPostSuccess} disabled={loading}>
+            <Button disabled={loading} onClick={testPostSuccess}>
               POST Success
             </Button>
             <Button
-              onClick={testPostError}
               disabled={loading}
+              onClick={testPostError}
               variant="destructive"
             >
               POST Error
