@@ -18,7 +18,7 @@ const router: Router = {
       fileTypes: ["image/*"],
       multipleFiles: true,
       maxFiles: 10,
-      maxFileSize: 10 * 1024 * 1024,
+      maxFileSize: 30 * 1024 * 1024,
       onBeforeUpload: async () => ({
         generateObjectInfo: ({ file }) => {
           const ym = yearMonth();

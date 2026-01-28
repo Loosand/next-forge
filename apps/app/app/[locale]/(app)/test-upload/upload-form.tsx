@@ -28,7 +28,12 @@ export function UploadForm() {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const { upload, isPending, progresses } = useUploadFiles({
-    route: "avatar" satisfies UploadRoute,
+    route: "images" satisfies UploadRoute,
+    onUploadProgress: ({ file }) => {
+      console.log(
+        `Progress: ${file.name} - ${Math.round(file.progress * 100)}%`
+      );
+    },
     onUploadComplete: ({ files }) => {
       console.log("Upload complete:", files);
       const newFiles = files.map((file) => {
@@ -59,7 +64,9 @@ export function UploadForm() {
   const totalProgress =
     progresses.length > 0
       ? Math.round(
-          progresses.reduce((sum, p) => sum + p.progress, 0) / progresses.length
+          (progresses.reduce((sum, p) => sum + p.progress, 0) /
+            progresses.length) *
+            100
         )
       : 0;
 
@@ -88,17 +95,37 @@ export function UploadForm() {
             </Button>
           </div>
 
-          {isPending && (
-            <div className="space-y-2">
-              <div className="h-2 w-full rounded-full bg-secondary">
-                <div
-                  className="h-2 rounded-full bg-primary transition-all"
-                  style={{ width: `${totalProgress}%` }}
-                />
+          {isPending && progresses.length > 0 && (
+            <div className="space-y-3">
+              <div className="space-y-1">
+                <div className="flex justify-between text-sm">
+                  <span>Total Progress</span>
+                  <span className="font-medium">{totalProgress}%</span>
+                </div>
+                <div className="h-2 w-full rounded-full bg-secondary">
+                  <div
+                    className="h-2 rounded-full bg-primary transition-all"
+                    style={{ width: `${totalProgress}%` }}
+                  />
+                </div>
               </div>
-              <p className="text-muted-foreground text-sm">
-                Uploading {progresses.length} file(s)...
-              </p>
+              <div className="space-y-2">
+                {progresses.map((p, i) => (
+                  // biome-ignore lint/suspicious/noArrayIndexKey: static render
+                  <div className="space-y-1" key={i}>
+                    <div className="flex justify-between text-muted-foreground text-xs">
+                      <span className="max-w-[200px] truncate">{p.name}</span>
+                      <span>{Math.round(p.progress * 100)}%</span>
+                    </div>
+                    <div className="h-1.5 w-full rounded-full bg-secondary">
+                      <div
+                        className="h-1.5 rounded-full bg-primary/70 transition-all"
+                        style={{ width: `${p.progress * 100}%` }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
 
