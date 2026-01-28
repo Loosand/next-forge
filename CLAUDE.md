@@ -4,58 +4,6 @@ next-forge 是一个生产级的 Turborepo Next.js 应用模板。它是一个�
 
 关于本项目的详细文档，请参见 `docs/content/docs/` 中的文档。
 
-## 命令
-
-### 根目录命令
-
-```bash
-# 开发
-bun run dev              # 并发启动所有应用（不包括 docs、cms、storybook）
-bun run build            # 构建所有包和应用（先运行测试）
-bun run test             # 在整个 monorepo 中运行 Vitest
-
-# 代码质量
-bun run check            # 代码检查和格式检查（ultracite/biome）
-bun run fix              # 自动修复格式问题
-
-# 数据库（packages/database 命令的快捷方式）
-bun run db:generate      # 从 schema 生成 Drizzle 客户端
-bun run db:migrate       # 运行迁移
-bun run db:push          # 推送 schema 更改到数据库
-bun run db:studio        # 打开 Drizzle Studio
-
-# 后台任务（Trigger.dev）
-bun run trigger:dev      # 启动 Trigger.dev 本地开发服务器
-bun run trigger:deploy   # 部署任务到 Trigger.dev 云端
-
-# 维护
-bun run analyze          # Bundle 大小分析
-bun run clean            # 深度清理所有 node_modules
-bun run bump-deps        # 更新所有依赖（recharts 除外）
-bun run bump-ui          # 更新所有 shadcn/ui 组件
-```
-
-### 单个应用开发
-
-在应用目录中（例如 `apps/app/`）：
-```bash
-bun run dev              # 启动单个应用（使用 dotenv 加载 ../../.env 和 .env）
-bun run build            # 构建应用
-bun run test             # 运行应用测试
-bun run typecheck        # TypeScript 类型检查
-```
-
-### 数据库包命令
-
-在 `packages/database/` 中：
-```bash
-bun run generate         # 从 schema.ts 生成 Drizzle 客户端
-bun run migrate          # 运行迁移
-bun run push             # 推送 schema 到数据库（比 migrate 快）
-bun run studio           # 打开 Drizzle Studio UI
-```
-
-
 ## 架构
 
 ### Monorepo 结构
@@ -142,12 +90,4 @@ packages/trigger/
 ├── tasks/              # 任务定义目录
 │   └── hello-world.ts
 └── index.ts            # 导出入口
-```
-
-```typescript
-// 在应用中触发任务
-import { helloWorldTask } from "@repo/trigger";
-
-const handle = await helloWorldTask.trigger({ name: "User" });
-const result = await handle.wait(); // 可选：等待结果
 ```
