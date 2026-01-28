@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { signIn } from "../client";
+import { emailOtp, signIn } from "../client";
 
 export const SignIn = () => {
   const [email, setEmail] = useState("");
@@ -23,6 +23,16 @@ export const SignIn = () => {
       });
 
       if (result.error) {
+        // If email not verified, redirect to verification page
+        if (result.error.code === "EMAIL_NOT_VERIFIED") {
+          // Send a new verification OTP
+          await emailOtp.sendVerificationOtp({
+            email,
+            type: "email-verification",
+          });
+          router.push(`/auth/verify-email?email=${encodeURIComponent(email)}`);
+          return;
+        }
         setError(result.error.message || "Sign in failed");
       } else {
         router.push("/");

@@ -19,6 +19,7 @@ import * as schema from "@repo/database/schema";
 import { resend } from "@repo/email";
 import { keys as emailKeys } from "@repo/email/keys";
 import { OTPTemplate } from "@repo/email/templates/otp";
+import { createActionLogger } from "@repo/logger";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
@@ -68,6 +69,9 @@ export const auth = betterAuth({
       expiresIn: 300, // 5 minutes
       sendVerificationOnSignUp: true,
       async sendVerificationOTP({ email: userEmail, otp, type }) {
+        const log = createActionLogger("sendVerificationOTP");
+        log.set({ type, to: userEmail });
+
         const subject =
           type === "sign-in"
             ? "Sign in to your account"
@@ -75,14 +79,29 @@ export const auth = betterAuth({
               ? "Verify your email address"
               : "Reset your password";
 
-        const html = await render(OTPTemplate({ otp, type }));
+        try {
+          const html = await render(OTPTemplate({ otp, type }));
 
-        await resend.emails.send({
-          from: email.RESEND_FROM,
-          to: userEmail,
-          subject,
-          html,
-        });
+          const { data, error: resendError } = await resend.emails.send({
+            from: email.RESEND_FROM,
+            to: userEmail,
+            subject,
+            html,
+          });
+
+          if (resendError) {
+            log.set({ error: resendError });
+            log.emit();
+            throw new Error(resendError.message);
+          }
+
+          log.set({ result: { id: data?.id } });
+          log.emit();
+        } catch (error) {
+          log.error(error as Error, { step: "send-email" });
+          log.emit();
+          throw error;
+        }
       },
     }),
   ],
@@ -107,13 +126,19 @@ export const auth = betterAuth({
       create: {
         // biome-ignore lint/suspicious/useAwait: trackRegistrationUser is async
         after: async (createdUser) => {
+          const log = createActionLogger("user.create.after");
+          log.set({ userId: createdUser.id });
+
           // biome-ignore lint/complexity/noVoid: must void
-          void saveTrackingData(createdUser.id).catch((error) => {
-            console.log(
-              "[Database Hook After] Failed to save registration tracking:",
-              error
-            );
-          });
+          void saveTrackingData(createdUser.id)
+            .then(() => {
+              log.set({ tracking: "saved" });
+              log.emit();
+            })
+            .catch((error) => {
+              log.error(error as Error, { step: "save-tracking" });
+              log.emit();
+            });
         },
       },
       update: {

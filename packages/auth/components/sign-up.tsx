@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { signUp } from "../client";
+import { emailOtp, signUp } from "../client";
 
 export const SignUp = () => {
   const [name, setName] = useState("");
@@ -25,6 +25,23 @@ export const SignUp = () => {
       });
 
       if (result.error) {
+        // If user already exists, try to send verification OTP
+        // This handles the case where user registered but never verified
+        if (result.error.code === "USER_ALREADY_EXISTS") {
+          try {
+            await emailOtp.sendVerificationOtp({
+              email,
+              type: "email-verification",
+            });
+            // OTP sent successfully, user exists but not verified
+            router.push(`/auth/verify-email?email=${encodeURIComponent(email)}`);
+            return;
+          } catch {
+            // OTP send failed, user is likely already verified
+            setError("An account with this email already exists. Please sign in.");
+            return;
+          }
+        }
         setError(result.error.message || "Sign up failed");
       } else {
         // Redirect to OTP verification page
