@@ -1,14 +1,32 @@
 # @repo/logger
 
-统一的日志输出包，提供环境感知的日志记录能力。
+基于 [evlog](https://evlog.dev) 的 Wide Events 日志包，每个请求输出一条包含所有上下文的结构化日志。
 
-## 特性
+## Wide Events 是什么？
 
-- 🌍 **环境感知**：自动检测运行环境，服务端使用 signale，客户端使用 console
-- 🎨 **美化输出**：服务端提供结构化和美化的日志输出
-- 🚀 **零配置**：开箱即用，无需任何配置
-- 🔄 **懒加载**：使用 Proxy 实现按需初始化，避免循环依赖
-- 📦 **体积优化**：客户端 bundle 不包含 signale 依赖
+传统日志方式会产生分散的多条日志：
+
+```
+console.log('Request received')
+console.log('User:', user.id)
+console.log('Cart loaded')
+console.log('Payment failed')
+```
+
+Wide Events 模式将所有上下文合并为一条日志：
+
+```json
+{
+  "timestamp": "2025-01-28T10:23:45.612Z",
+  "level": "info",
+  "method": "POST",
+  "path": "/api/checkout",
+  "duration": "1.2s",
+  "user": { "id": "123", "plan": "premium" },
+  "cart": { "items": 3, "total": 9999 },
+  "status": 200
+}
+```
 
 ## 安装
 
@@ -24,186 +42,220 @@
 
 ## 使用方法
 
-### 基础使用
+### API Route 中使用
 
 ```typescript
-import { logger } from '@repo/logger';
+import { createRequestLogger } from '@repo/logger';
+import { NextRequest, NextResponse } from 'next/server';
 
-// 标准日志方法
-logger.log('这是一条日志');
-logger.info('信息提示');
-logger.warn('警告信息');
-logger.error('错误信息');
-logger.debug('调试信息');
+export async function POST(request: NextRequest) {
+  const log = createRequestLogger(request);
 
-// 扩展方法（来自 signale）
-logger.success('操作成功');    // ✅
-logger.start('任务开始...');   // ⏳
-logger.complete('任务完成');   // ✓
-logger.note('备注信息');
-logger.fatal('致命错误');
+  // 累积上下文
+  log.set({ user: { id: "123", plan: "premium" } });
+  log.set({ cart: { items: 3, total: 9999 } });
+
+  try {
+    const result = await processOrder();
+    log.set({ result });
+    log.emit(); // 输出一条完整的日志
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    log.error(error as Error, { step: "payment" });
+    log.emit();
+    throw error;
+  }
+}
 ```
 
-### 在 Server Actions 中使用
+### Server Action 中使用
 
 ```typescript
 'use server';
 
-import { logger } from '@repo/logger';
+import { createActionLogger, createError } from '@repo/logger';
 
-export async function createUser(data: FormData) {
-  logger.start('创建用户...');
+export async function checkout(formData: FormData) {
+  const log = createActionLogger("checkout");
+
+  log.set({ user: { id: "123" } });
+  log.set({ input: Object.fromEntries(formData) });
 
   try {
-    const user = await db.user.create({ ... });
-    logger.success('用户创建成功', user.id);
-    return { success: true };
+    const order = await processOrder();
+    log.set({ result: { orderId: order.id } });
+    log.emit();
+    return { success: true, orderId: order.id };
   } catch (error) {
-    logger.error('创建用户失败', error);
-    return { success: false };
+    log.error(error as Error, { step: "payment" });
+    log.emit();
+
+    // 返回结构化错误
+    throw createError({
+      message: "Checkout failed",
+      status: 500,
+      why: (error as Error).message,
+      fix: "Please try again or contact support",
+    });
   }
 }
 ```
 
-### 在 API 路由中使用
+### 简单日志 API
+
+对于不需要请求上下文的场景，可以使用简单日志 API：
 
 ```typescript
-import { logger } from '@repo/logger';
+import { log } from '@repo/logger';
 
-export async function GET(request: Request) {
-  logger.info('收到请求', request.url);
-
-  // ... 处理逻辑
-
-  logger.debug('返回响应', response);
-  return response;
-}
-```
-
-### 在客户端组件中使用
-
-```typescript
-'use client';
-
-import { logger } from '@repo/logger';
-
-export function MyComponent() {
-  const handleClick = () => {
-    logger.info('按钮被点击');
-    // ...
-  };
-
-  return <button onClick={handleClick}>点击</button>;
-}
-```
-
-## 环境差异
-
-### 服务端（Node.js）
-
-使用 [signale](https://github.com/klaussinani/signale)：
-- ✅ 美化的彩色输出
-- ✅ 结构化的日志格式
-- ✅ 时间戳和作用域支持
-- ✅ 多种日志级别和图标
-
-### 客户端（浏览器）
-
-使用原生 console 包装器：
-- ✅ 轻量级实现
-- ✅ 保留原生 console 的所有特性
-- ✅ 扩展方法使用表情符号增强（✅ ⏳ ✓）
-- ✅ 不增加 bundle 体积
-
-## 技术实现
-
-### 懒加载机制
-
-使用 ES6 Proxy 实现懒加载，避免以下问题：
-
-1. **循环依赖**：其他包可能在初始化时导入 logger
-2. **环境检测时机**：确保环境检测在真正使用时才执行
-3. **副作用隔离**：模块加载阶段不执行任何初始化代码
-
-```typescript
-export const logger = new Proxy({} as Logger, {
-  get(_target, prop: string) {
-    if (!loggerInstance) {
-      loggerInstance = createLogger(); // 首次访问时才创建
-    }
-    return loggerInstance[prop as keyof Logger];
-  },
-});
-```
-
-### 环境检测
-
-通过 `typeof window === "undefined"` 判断运行环境：
-
-```typescript
-function createLogger(): Logger {
-  if (typeof window === "undefined") {
-    // 服务端：延迟 require signale
-    return require("signale") as Signale;
-  }
-
-  // 客户端：返回 console 包装器
-  return { /* ... */ };
-}
+log.info("startup", "Server started");
+log.error("db", "Connection failed");
+log.debug("cache", "Cache hit", { key: "user:123" });
 ```
 
 ## API 参考
 
-### Logger 接口
+### createRequestLogger(request: Request)
 
-所有方法接受任意数量的参数，参数会被传递给底层的日志实现。
+为 API Route 创建请求日志器。
 
-| 方法 | 说明 | 服务端 | 客户端 |
-|------|------|--------|--------|
-| `log(...args)` | 通用日志输出 | signale.log | console.log |
-| `info(...args)` | 信息提示 | signale.info | console.info |
-| `warn(...args)` | 警告信息 | signale.warn | console.warn |
-| `error(...args)` | 错误信息 | signale.error | console.error |
-| `debug(...args)` | 调试信息 | signale.debug | console.debug |
-| `success(...args)` | 成功标记 | signale.success | console.log('✅', ...) |
-| `start(...args)` | 任务开始 | signale.start | console.log('⏳', ...) |
-| `complete(...args)` | 任务完成 | signale.complete | console.log('✓', ...) |
-| `note(...args)` | 备注信息 | signale.note | console.info |
-| `fatal(...args)` | 致命错误 | signale.fatal | console.error |
+```typescript
+const log = createRequestLogger(request);
+log.set({ key: value });  // 添加上下文
+log.error(error, ctx);    // 记录错误
+log.emit();               // 输出日志
+```
 
-## 文档结构
+### createActionLogger(actionName: string)
 
-本包遵循[分形文档结构指南](../../.claude/rules/fractal-documentation-guide.md)：
+为 Server Action 创建日志器。
 
-- **Level 1**: `/CLAUDE.md` - 包含在 monorepo 架构描述中
-- **Level 2**: `.folder.md` - 三行极简文档（地位/逻辑/约束）
-- **Level 3**: `index.ts` - 文件 Header（INPUT/OUTPUT/POS/PROTOCOL）
+```typescript
+const log = createActionLogger("checkout");
+log.set({ user: { id: "123" } });
+log.emit();
+```
 
-## 维护指南
+### createError(options)
 
-### 添加新的日志方法
+创建结构化错误。
 
-如果需要添加新的日志方法，必须：
+```typescript
+throw createError({
+  message: "Payment failed",    // 错误消息
+  status: 402,                  // HTTP 状态码
+  why: "Card declined",         // 错误原因
+  fix: "Try another card",      // 建议修复方式
+});
+```
 
-1. ✅ 更新 `Logger` 类型定义
-2. ✅ 在服务端实现（确保 signale 支持）
-3. ✅ 在客户端实现（使用 console 方法或表情符号增强）
-4. ✅ 更新 `index.ts` 顶部的 PROTOCOL 注释
-5. ✅ 检查并更新 `.folder.md`
-6. ✅ 更新本 README 的 API 参考表格
+### parseError(error)
 
-### 同步协议
+解析错误为结构化格式。
 
-遵循分形文档结构的同步协议：
+```typescript
+try {
+  await checkout();
+} catch (err) {
+  const error = parseError(err);
+  console.log(error.message, error.why, error.fix);
+}
+```
+
+### log
+
+简单日志 API，支持 `info`、`error`、`debug`、`warn` 等方法。
+
+```typescript
+log.info("tag", "message", { context });
+log.error("tag", "message", { context });
+```
+
+## 日志输出格式
+
+开发环境会输出美化的 JSON：
 
 ```
-代码变更 → 更新 index.ts Header → 检查 .folder.md → 上浮到 CLAUDE.md
+[next-forge-app] POST /api/checkout 200 1.2s
+{
+  user: { id: "123", plan: "premium" },
+  cart: { items: 3, total: 9999 },
+  result: { orderId: "order_789" }
+}
+```
+
+生产环境输出单行 JSON，便于日志聚合：
+
+```json
+{"timestamp":"2025-01-28T10:23:45.612Z","level":"info","service":"next-forge-app","method":"POST","path":"/api/checkout","status":200,"duration":"1.2s","user":{"id":"123"},"cart":{"items":3}}
+```
+
+## 最佳实践
+
+### 1. 每个请求只输出一条日志
+
+```typescript
+// 正确：累积上下文，最后 emit
+log.set({ step1: "done" });
+log.set({ step2: "done" });
+log.emit();
+
+// 错误：多次独立输出
+console.log("step1 done");
+console.log("step2 done");
+```
+
+### 2. 使用结构化数据
+
+```typescript
+// 正确：结构化数据
+log.set({ user: { id: "123", plan: "premium" } });
+
+// 避免：字符串拼接
+log.set({ info: `User 123 with plan premium` });
+```
+
+### 3. 错误时也要 emit
+
+```typescript
+try {
+  // ...
+  log.emit();
+} catch (error) {
+  log.error(error as Error);
+  log.emit(); // 不要忘记 emit
+  throw error;
+}
+```
+
+### 4. 敏感数据脱敏
+
+```typescript
+// 不要记录敏感信息
+log.set({
+  user: { id: user.id }, // 只记录 ID
+  // 不要: password, token, creditCard 等
+});
+```
+
+## 配置
+
+通过 `initEvlog` 自定义配置（通常不需要手动调用）：
+
+```typescript
+import { initEvlog } from '@repo/logger';
+
+initEvlog({
+  service: "my-app",
+  environment: "production",
+  version: "1.0.0",
+  pretty: false, // 生产环境关闭美化输出
+});
 ```
 
 ## 依赖
 
-- **signale**: 服务端日志美化库（仅服务端）
-- **@types/signale**: TypeScript 类型定义（开发依赖）
+- **evlog**: Wide Events 日志库
 
 ## License
 

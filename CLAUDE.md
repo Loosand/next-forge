@@ -34,7 +34,7 @@ packages/
 ├── seo/                # SEO 元数据工具
 ├── storage/            # 文件存储
 ├── internationalization/ # 国际化支持
-├── logger/             # 统一日志输出（环境感知：服务端 signale / 客户端 console）
+├── logger/             # 统一日志输出（宽事件范式）
 ├── trigger/            # Trigger.dev v4 后台任务队列（异步任务、定时任务）
 ├── ai/                 # AI 工具
 └── ...                 # 其他共享包
