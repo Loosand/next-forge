@@ -11,7 +11,7 @@ import {
 import { Input } from "@repo/design-system/components/ui/input";
 import { useUploadFiles } from "@repo/storage/client";
 import { useRef, useState } from "react";
-import type { UploadRoute } from "@/app/api/upload/route";
+import type { UploadRoute } from "@/app/api/upload/types";
 import { env } from "@/env";
 
 const R2_PUBLIC_URL = env.NEXT_PUBLIC_CLOUDFLARE_R2_URL;
@@ -28,7 +28,7 @@ export function UploadForm() {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const { upload, isPending, progresses } = useUploadFiles({
-    route: "images" satisfies UploadRoute,
+    route: "avatar" satisfies UploadRoute,
     onUploadProgress: ({ file }) => {
       console.log(
         `Progress: ${file.name} - ${Math.round(file.progress * 100)}%`
