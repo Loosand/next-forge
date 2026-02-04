@@ -1,7 +1,10 @@
-export default function Page() {
+import { EmptyState, GenerationForm } from "./_components";
+
+export default function ImagePage() {
   return (
-    <div className="flex h-(--screen-height-minus-header) items-center justify-center">
-      page
+    <div className="flex h-(--screen-height-minus-header) flex-col">
+      <EmptyState />
+      <GenerationForm />
     </div>
   );
 }

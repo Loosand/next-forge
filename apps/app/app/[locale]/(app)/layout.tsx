@@ -1,5 +1,4 @@
 import type { ReactNode } from "react";
-import { Footer } from "../_components/footer";
 import { Header } from "../_components/header";
 
 type LocaleLayoutProperties = {
@@ -10,11 +9,10 @@ type LocaleLayoutProperties = {
 };
 
 const LocaleLayout = async ({ children, params }: LocaleLayoutProperties) => (
-  <>
+  <div className="dark:bg-black">
     <Header />
     {children}
-    <Footer />
-  </>
+  </div>
 );
 
 export default LocaleLayout;

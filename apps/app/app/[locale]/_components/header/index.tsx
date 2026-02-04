@@ -53,7 +53,7 @@ export const Header = () => {
   const pathname = usePathname();
 
   return (
-    <header className="sticky top-0 left-0 z-40 w-full bg-background/80 backdrop-blur-md">
+    <header className="sticky top-0 left-0 z-40 w-full bg-background backdrop-blur-md dark:bg-black">
       <div className="container relative mx-auto flex h-(--header-height) items-center gap-4">
         {/* Left: Logo */}
         <Link href="/">
