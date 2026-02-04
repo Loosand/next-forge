@@ -24,11 +24,6 @@ export const mediaTypeEnum = pgEnum("media_type", ASSET_TYPE);
 // Tables
 // ============================================
 
-export const page = pgTable("page", {
-  id: serial("id").primaryKey(),
-  name: text("name").notNull(),
-});
-
 export const task = pgTable("task", {
   id: serial("id").primaryKey(),
   userId: text("user_id")
