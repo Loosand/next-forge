@@ -91,7 +91,7 @@ const meta: Meta<typeof TooltipContent> = {
       <Tooltip>
         <TooltipTrigger
           render={
-            <button type="button" className="rounded-md p-2 hover:bg-muted">
+            <button className="rounded-md p-2 hover:bg-muted" type="button">
               <Plus className="h-4 w-4" />
               <span className="sr-only">Add</span>
             </button>
@@ -176,7 +176,7 @@ export const Hoverable: Story = {
       <TooltipTrigger render={<Button variant="outline">Hover me</Button>} />
       <TooltipContent {...args}>
         <p>You can hover over this tooltip without it closing</p>
-        <a href="#" className="text-primary underline">
+        <a className="text-primary underline" href="#">
           Click me
         </a>
       </TooltipContent>
