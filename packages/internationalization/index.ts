@@ -3,12 +3,11 @@ import type en from "./dictionaries/en.json";
 import languine from "./languine.json" with { type: "json" };
 
 // 导出所有支持的语言列表，从 languine.json 配置文件里读取
-export const locales = [
-  languine.locale.source,
-  ...languine.locale.targets,
-] as const;
+export const locales = [languine.locale.source, ...languine.locale.targets];
 
 export type Dictionary = typeof en;
+
+export type Locales = typeof locales;
 
 const dictionaries: Record<string, () => Promise<Dictionary>> =
   Object.fromEntries(
