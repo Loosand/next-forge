@@ -1,16 +1,16 @@
 /**
  * [INPUT]: NextRequest/NextResponse - Next.js 请求响应对象; cookies() - Next.js cookies API
- * [OUTPUT]: getTrackingCookies() - RegistrationMeta | null; setTrackingCookies() - void; 常量导出
+ * [OUTPUT]: getTrackingCookies() - TRegistrationMeta | null; setTrackingCookies() - void; 常量导出
  * [POS]: 位于 /packages/auth/utils 的 Cookie 管理工具，在 middleware 和注册流程中使用
  *
  * [PROTOCOL]:
  * 1. 一旦本文件的 Cookie 策略、追踪逻辑变更，必须同步更新此 Header
  * 2. 更新后必须上浮检查 /packages/auth/utils/.folder.md 的描述是否依然准确
  * 3. 修改 COOKIE_OPTIONS 时，必须确保符合安全最佳实践和隐私政策
- * 4. 新增追踪字段时，必须同时更新 @repo/database/types 中的 RegistrationMeta 类型
+ * 4. 新增追踪字段时，必须同时更新 @repo/database/types 中的 TRegistrationMeta 类型
  */
 
-import type { RegistrationMeta } from "@repo/database/types";
+import type { TRegistrationMeta } from "@repo/database/types";
 import { cookies } from "next/headers";
 import type { NextRequest, NextResponse } from "next/server";
 
@@ -50,7 +50,7 @@ const COOKIE_OPTIONS = {
  *
  * @returns RegistrationMeta 对象或 null（如果 Cookie 不存在或解析失败）
  */
-async function getTrackingCookies(): Promise<RegistrationMeta | null> {
+async function getTrackingCookies(): Promise<TRegistrationMeta | null> {
   const cookieStore = await cookies();
   const trackingRaw = cookieStore.get(TRACKING_COOKIE)?.value;
 
@@ -59,7 +59,7 @@ async function getTrackingCookies(): Promise<RegistrationMeta | null> {
   }
 
   try {
-    return JSON.parse(trackingRaw) as RegistrationMeta;
+    return JSON.parse(trackingRaw) as TRegistrationMeta;
   } catch {
     // JSON 解析失败，返回 null（Cookie 可能被篡改或损坏）
     return null;

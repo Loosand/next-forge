@@ -1,4 +1,4 @@
-import type { RegistrationMeta } from "@repo/database/types";
+import type { TRegistrationMeta } from "@repo/database/types";
 
 /**
  * 根据追踪数据判断注册来源
@@ -6,7 +6,7 @@ import type { RegistrationMeta } from "@repo/database/types";
  * 前期数据不会丢失，会被保存至 metadata 中
  */
 function determineRegistrationSource(
-  trackingData: RegistrationMeta
+  trackingData: TRegistrationMeta
 ): string | null {
   // 未能识别具体来源
   return null;
