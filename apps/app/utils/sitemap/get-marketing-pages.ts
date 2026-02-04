@@ -7,6 +7,12 @@ import path from "node:path";
  */
 export const getMarketingPages = (): string[] => {
   const marketingDir = path.join(process.cwd(), "app/[locale]/(marketing)");
+
+  // 检查目录是否存在
+  if (!fs.existsSync(marketingDir)) {
+    return ["/"];
+  }
+
   const marketingFolders = fs.readdirSync(marketingDir, {
     withFileTypes: true,
   });
