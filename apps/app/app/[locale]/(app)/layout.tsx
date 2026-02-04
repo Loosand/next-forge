@@ -1,4 +1,3 @@
-import { getDictionary } from "@repo/internationalization";
 import type { ReactNode } from "react";
 import { Footer } from "../_components/footer";
 import { Header } from "../_components/header";
@@ -10,17 +9,12 @@ type LocaleLayoutProperties = {
   }>;
 };
 
-const LocaleLayout = async ({ children, params }: LocaleLayoutProperties) => {
-  const { locale } = await params;
-  const dictionary = await getDictionary(locale);
-
-  return (
-    <>
-      <Header dictionary={dictionary} />
-      {children}
-      <Footer />
-    </>
-  );
-};
+const LocaleLayout = async ({ children, params }: LocaleLayoutProperties) => (
+  <>
+    <Header />
+    {children}
+    <Footer />
+  </>
+);
 
 export default LocaleLayout;
