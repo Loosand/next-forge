@@ -9,14 +9,6 @@ import type {
   NanoBananaProInput,
   NanoBananaProOutput,
 } from "@fal-ai/client/endpoints";
-import type { FalModelId } from "@/types";
-
-export type {
-  NanoBananaInput,
-  NanoBananaOutput,
-} from "@fal-ai/client/endpoints";
-
-const ENDPOINT_ID: FalModelId = "fal-ai/nano-banana";
 
 export type NanoBananaOptions = {
   input: NanoBananaInput;
@@ -27,7 +19,7 @@ export type NanoBananaOptions = {
 export async function nanoBanana(
   options: NanoBananaOptions
 ): Promise<NanoBananaOutput> {
-  const result = await fal.subscribe(ENDPOINT_ID, {
+  const result = await fal.subscribe("fal-ai/nano-banana", {
     input: options.input,
     logs: options.logs,
     onQueueUpdate: options.onQueueUpdate,
@@ -42,9 +34,9 @@ export type NanoBananaEditOptions = {
 };
 
 export async function nanoBananaEdit(
-  options: NanoBananaOptions
+  options: NanoBananaEditOptions
 ): Promise<NanoBananaEditOutput> {
-  const result = await fal.subscribe(ENDPOINT_ID, {
+  const result = await fal.subscribe("fal-ai/nano-banana/edit", {
     input: options.input,
     logs: options.logs,
     onQueueUpdate: options.onQueueUpdate,
@@ -59,9 +51,9 @@ export type NanoBananaProOptions = {
 };
 
 export async function nanoBananaPro(
-  options: NanoBananaOptions
+  options: NanoBananaProOptions
 ): Promise<NanoBananaProOutput> {
-  const result = await fal.subscribe(ENDPOINT_ID, {
+  const result = await fal.subscribe("fal-ai/nano-banana-pro", {
     input: options.input,
     logs: options.logs,
     onQueueUpdate: options.onQueueUpdate,
@@ -76,9 +68,9 @@ export type NanoBananaProEditOptions = {
 };
 
 export async function nanoBananaProEdit(
-  options: NanoBananaOptions
+  options: NanoBananaProEditOptions
 ): Promise<NanoBananaProEditOutput> {
-  const result = await fal.subscribe(ENDPOINT_ID, {
+  const result = await fal.subscribe("fal-ai/nano-banana-pro/edit", {
     input: options.input,
     logs: options.logs,
     onQueueUpdate: options.onQueueUpdate,
