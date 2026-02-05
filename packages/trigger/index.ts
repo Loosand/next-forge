@@ -9,4 +9,12 @@
  */
 
 export { keys } from "./keys";
+export {
+  triggerNanoBanana,
+  triggerNanoBananaEdit,
+  triggerNanoBananaPro,
+  triggerNanoBananaProEdit,
+} from "./tasks/fal-models";
+export { createTypedFalTrigger, falRunTask } from "./tasks/fal-run";
 export { helloWorldTask } from "./tasks/hello-world";
+export type { FalRunPayload, FalRunResult } from "./types/fal";

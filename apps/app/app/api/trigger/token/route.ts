@@ -3,11 +3,16 @@ import { auth as triggerAuth } from "@trigger.dev/sdk/v3";
 
 export const POST = async () => {
   try {
-    // 生成 trigger token，允许触发 hello-world 任务并读取运行状态
-    const triggerToken = await triggerAuth.createTriggerPublicToken(
-      "hello-world",
-      { expirationTime: "1h" }
-    );
+    // 生成 trigger token，允许触发任务并读取运行状态
+    // 使用 scopes 格式允许读取所有 runs
+    const triggerToken = await triggerAuth.createPublicToken({
+      scopes: {
+        read: {
+          runs: true,
+        },
+      },
+      expirationTime: "1h",
+    });
 
     return Response.json({ token: triggerToken });
   } catch (error) {
