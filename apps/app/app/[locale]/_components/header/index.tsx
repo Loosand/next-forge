@@ -3,10 +3,8 @@
 import { LogoIcon } from "@repo/design-system/components/icons/logo-icon";
 import { Button } from "@repo/design-system/components/ui/button";
 import { LanguageSwitcher } from "@repo/internationalization/ui/language-switcher";
-import { Menu, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
 
 const navItems = [
   { label: "Explore", href: "/" },
@@ -49,12 +47,11 @@ const NavLink = ({
 );
 
 export const Header = () => {
-  const [isOpen, setOpen] = useState(false);
   const pathname = usePathname();
 
   return (
     <header className="sticky top-0 left-0 z-40 w-full bg-background backdrop-blur-md dark:bg-black">
-      <div className="container relative mx-auto flex h-(--header-height) items-center gap-4">
+      <div className="container relative mx-auto flex h-(--header-height) items-center gap-4 px-4 md:px-0">
         {/* Left: Logo */}
         <Link href="/">
           <LogoIcon />
@@ -90,41 +87,8 @@ export const Header = () => {
           </Button>
 
           <Button render={<Link href="/auth/sign-up" />}>Sign up</Button>
-
-          {/* Mobile menu toggle */}
-          <Button
-            className="xl:hidden"
-            onClick={() => setOpen(!isOpen)}
-            size="icon"
-            variant="ghost"
-          >
-            {isOpen ? <X className="size-5" /> : <Menu className="size-5" />}
-          </Button>
         </div>
       </div>
-
-      {/* Mobile Navigation */}
-      {isOpen && (
-        <div className="border-border/10 border-t bg-background xl:hidden">
-          <nav className="container mx-auto flex flex-col gap-1 py-4">
-            {navItems.map((item) => (
-              <NavLink
-                badge={item.badge}
-                href={item.href}
-                isActive={pathname.startsWith(item.href)}
-                key={item.href}
-                label={item.label}
-              />
-            ))}
-            <Link
-              className="rounded-xl px-2 py-1 font-medium text-muted-foreground text-sm transition hover:text-primary active:opacity-60"
-              href="/pricing"
-            >
-              Pricing
-            </Link>
-          </nav>
-        </div>
-      )}
     </header>
   );
 };
