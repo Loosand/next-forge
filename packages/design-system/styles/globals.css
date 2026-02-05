@@ -43,10 +43,13 @@
   --sidebar-border: rgba(19, 21, 23, 0.1);
   --sidebar-ring: #131517;
   --header-height: 4rem; /* Header 高度 */
+  --mobile-menu-height: 3.5rem; /* Mobile Menu 高度 */
   --screen-height-minus-header: calc(
-    100svh -
-    var(--header-height)
+    100svh - var(--header-height)
   ); /* 满屏幕 - Header 高度 */
+  --screen-height-minus-header-mobile-menu: calc(
+    100svh - var(--header-height) - var(--mobile-menu-height)
+  ); /* 满屏幕 - Header - Mobile Menu 高度 */
 
   --font-weight-bold: 700;
 }
@@ -198,7 +201,7 @@
     text-rendering: optimizelegibility;
   }
   body {
-    @apply min-h-[100dvh];
+    @apply min-h-dvh;
   }
   input::placeholder,
   textarea::placeholder {

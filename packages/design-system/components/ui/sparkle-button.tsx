@@ -42,11 +42,9 @@ const SparkleButton = forwardRef<HTMLButtonElement, SparkleButtonProps>(
           // Base styles
           "h-14 px-6 gap-2 rounded-xl border-none",
           "text-base font-semibold",
-          // Colors
-          "bg-primary text-primary-foreground",
-          // Radial gradient effect
-          "bg-[radial-gradient(ellipse_at_center,var(--color-primary-foreground)_0%,transparent_40%)]",
-          "bg-blend-soft-light",
+          // Colors - radial gradient: light center, dark edges
+          "text-primary-foreground",
+          "bg-[radial-gradient(ellipse_at_center,color-mix(in_srgb,var(--color-primary)_70%,white)_0%,var(--color-primary)_50%)]",
           // Inner shadow for 3D depth
           "shadow-[inset_0px_-3px_rgba(0,0,0,0.43)]",
           // Hover & active states
