@@ -20,7 +20,7 @@ export const generateMetadata = async ({
   });
 };
 
-export default function Home() {
+export default async function Home() {
   return (
     <div className="flex h-(--screen-height-minus-header-mobile-menu) flex-col items-center justify-center md:h-(--screen-height-minus-header)">
       Home
