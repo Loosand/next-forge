@@ -3,13 +3,7 @@
 import type { NanoBananaInput } from "@repo/fal/types";
 import { triggerNanoBanana } from "@repo/trigger";
 
-export type TriggerNanoBananaResult = {
-  runId: string;
-};
-
-export async function triggerNanoBananaAction(
-  input: NanoBananaInput
-): Promise<TriggerNanoBananaResult> {
+export async function triggerNanoBananaAction(input: NanoBananaInput) {
   const handle = await triggerNanoBanana({
     input,
     metadata: {

@@ -9,7 +9,7 @@ import {
   timestamp,
   varchar,
 } from "drizzle-orm/pg-core";
-import { ASSET_TYPE, TASK_STATUS } from "@/types";
+import { ASSET_TYPE, TASK_STATUS } from "../types";
 import { user } from "./auth";
 
 // ============================================

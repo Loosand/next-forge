@@ -60,9 +60,8 @@ export function FalForm() {
     setSubmitError(null);
 
     try {
-      // 调用 server action 触发任务
       const result = await triggerNanoBananaAction({
-        prompt: prompt || "A beautiful sunset",
+        prompt,
       });
       setRunId(result.runId);
     } catch (err) {

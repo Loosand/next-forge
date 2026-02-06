@@ -18,6 +18,8 @@ import type {
   NanoBananaProEditOutput,
   NanoBananaProInput,
   NanoBananaProOutput,
+  ZImageTurboInput,
+  ZImageTurboOutput,
 } from "@fal-ai/client/endpoints";
 import { createTypedFalTrigger } from "./fal-run";
 
@@ -45,3 +47,10 @@ export const triggerNanoBananaProEdit = createTypedFalTrigger<
   NanoBananaProEditInput,
   NanoBananaProEditOutput
 >("fal-ai/nano-banana-pro/edit");
+
+// Z Image 系列模型
+export const zImageTurbo = createTypedFalTrigger<
+  "fal-ai/z-image/turbo",
+  ZImageTurboInput,
+  ZImageTurboOutput
+>("fal-ai/z-image/turbo");
