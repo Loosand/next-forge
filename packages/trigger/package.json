@@ -5,8 +5,8 @@
   "main": "./index.ts",
   "types": "./index.ts",
   "scripts": {
-    "dev": "trigger dev",
-    "deploy": "trigger deploy",
+    "dev": "bun --env-file=../../.env trigger dev",
+    "deploy": "bun --env-file=../../.env trigger deploy",
     "clean": "git clean -xdf .cache .turbo dist node_modules",
     "typecheck": "tsc --noEmit --emitDeclarationOnly false"
   },
@@ -14,6 +14,7 @@
     "@fal-ai/client": "^1.9.0",
     "@repo/database": "workspace:*",
     "@repo/logger": "workspace:*",
+    "@repo/storage": "workspace:*",
     "@t3-oss/env-nextjs": "^0.13.8",
     "@trigger.dev/sdk": "4.3.3",
     "zod": "^4.1.13"

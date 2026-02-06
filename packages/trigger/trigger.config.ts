@@ -19,6 +19,11 @@ export default defineConfig({
   // You can override this on an individual task.
   // See https://trigger.dev/docs/runs/max-duration
   maxDuration: 3600,
+  build: {
+    // `server-only` 包通过 exports.react-server 条件解析到空模块。
+    // Trigger 任务运行在服务端，加此条件让 esbuild 正确解析。
+    conditions: ["react-server"],
+  },
   retries: {
     enabledInDev: true,
     default: {

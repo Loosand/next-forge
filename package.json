@@ -9,7 +9,7 @@
   ],
   "scripts": {
     "build": "turbo build",
-    "dev": "turbo dev --filter=!docs --filter=!@repo/cms --ui=stream",
+    "dev": "turbo dev --filter=!docs --filter=!@repo/cms --filter=!storybook --ui=stream",
     "dev:app": "cd apps/app && bun run dev",
     "dev:api": "cd apps/api && bun run dev",
     "dev:docs": "cd apps/docs && bun run dev",

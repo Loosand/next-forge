@@ -29,6 +29,7 @@
     "@repo/rate-limit": "workspace:*",
     "@repo/security": "workspace:*",
     "@repo/seo": "workspace:*",
+    "@repo/fal": "workspace:*",
     "@repo/storage": "workspace:*",
     "@repo/trigger": "workspace:*",
     "@repo/webhooks": "workspace:*",

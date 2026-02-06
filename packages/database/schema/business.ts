@@ -7,6 +7,7 @@ import {
   serial,
   text,
   timestamp,
+  uuid,
   varchar,
 } from "drizzle-orm/pg-core";
 import { ASSET_TYPE, TASK_STATUS } from "../types";
@@ -31,7 +32,7 @@ export const page = pgTable("page", {
 });
 
 export const task = pgTable("task", {
-  id: serial("id").primaryKey(),
+  id: uuid("id").defaultRandom().primaryKey(),
   userId: text("user_id")
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
@@ -45,8 +46,8 @@ export const task = pgTable("task", {
 });
 
 export const asset = pgTable("asset", {
-  id: serial("id").primaryKey(),
-  taskId: integer("task_id")
+  id: uuid("id").defaultRandom().primaryKey(),
+  taskId: uuid("task_id")
     .notNull()
     .references(() => task.id, { onDelete: "cascade" }),
   userId: text("user_id")
