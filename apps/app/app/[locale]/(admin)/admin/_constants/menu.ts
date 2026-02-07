@@ -10,6 +10,20 @@ const menus = [
     ],
   },
   {
+    title: "Task",
+    url: "/admin/task",
+    items: [
+      {
+        title: "Tasks",
+        url: "/admin/task",
+      },
+      {
+        title: "Assets",
+        url: "/admin/asset",
+      },
+    ],
+  },
+  {
     title: "Test",
     url: "/admin/test",
     items: [
@@ -24,6 +38,10 @@ const menus = [
       {
         title: "Evlog",
         url: "/admin/test/evlog",
+      },
+      {
+        title: "Fal",
+        url: "/admin/test/fal",
       },
     ],
   },

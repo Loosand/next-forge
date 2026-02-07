@@ -8,11 +8,11 @@
  * 2. 更新后必须上浮检查 /packages/trigger/.folder.md 的描述是否依然准确
  */
 
-import type { QueueStatus, Result } from "@fal-ai/client";
+import type { Result } from "@fal-ai/client";
 import type { FalModelId } from "@repo/fal/types";
 
 // Re-export fal standard types for convenience
-export type { QueueStatus, Result } from "@fal-ai/client";
+export type { Result } from "@fal-ai/client";
 
 /**
  * 从 fal 输出中提取的标准化媒体项，与 ASSET_TYPE ("image" | "video" | "audio") 对齐
@@ -60,16 +60,12 @@ export type FalRunResult<TOutput = unknown> =
       result: Result<TOutput>;
       /** 从输出中提取的标准化媒体列表 */
       media: ExtractedMedia[];
-      /** 执行过程中的队列状态日志（使用 fal 标准 QueueStatus） */
-      queueLogs: QueueStatus[];
       /** 调用方传入的元数据 */
       metadata?: Record<string, unknown>;
     }
   | {
       success: false;
       error: string;
-      /** 执行过程中的队列状态日志 */
-      queueLogs: QueueStatus[];
       /** 调用方传入的元数据 */
       metadata?: Record<string, unknown>;
     };

@@ -9,7 +9,6 @@
  * 2. 更新后必须上浮检查 /packages/trigger/.folder.md 的描述是否依然准确
  */
 
-import type { QueueStatus } from "@fal-ai/client";
 import { fal } from "@fal-ai/client";
 import { asset, database, eq, task as taskTable } from "@repo/database";
 import { buildKey, fetchAndUpload } from "@repo/storage";
@@ -142,7 +141,6 @@ export const falRunTask = task({
   maxDuration: 1800, // 30 minutes for long-running models like video generation
   run: async (payload: FalRunPayload): Promise<FalRunResult> => {
     const { endpointId, input, config, metadata, taskId, userId } = payload;
-    const queueLogs: QueueStatus[] = [];
     const pollIntervalSeconds = (config?.pollInterval ?? 2000) / 1000;
 
     logger.info("Starting fal.ai task", { endpointId, taskId, metadata });
@@ -167,7 +165,6 @@ export const falRunTask = task({
     );
 
     while (status.status !== "COMPLETED") {
-      queueLogs.push(status);
       await wait.for({ seconds: pollIntervalSeconds });
 
       status = await withRetry(
@@ -179,8 +176,6 @@ export const falRunTask = task({
         "fal.queue.status"
       );
     }
-
-    queueLogs.push(status);
 
     const result = await withRetry(
       () => fal.queue.result(endpointId, { requestId }),
@@ -248,8 +243,7 @@ export const falRunTask = task({
           .set({
             status: "completed",
             response: {
-              requestId: result.requestId,
-              mediaCount: media.length,
+              result: result.data,
             },
           })
           .where(eq(taskTable.id, taskId));
@@ -287,7 +281,6 @@ export const falRunTask = task({
       success: true,
       result,
       media,
-      queueLogs,
       metadata,
     };
   },

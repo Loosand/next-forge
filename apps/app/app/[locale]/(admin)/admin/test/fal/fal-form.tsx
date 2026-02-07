@@ -60,15 +60,10 @@ export function FalForm() {
     setTaskId(null);
 
     try {
-      const result = await triggerFalModelAction(
-        "fal-ai/wan/v2.2-a14b/text-to-video",
-        {
-          prompt,
-          num_frames: 17,
-          frames_per_second: 4,
-          resolution: "480p",
-        }
-      );
+      const result = await triggerFalModelAction("fal-ai/z-image/turbo", {
+        prompt,
+        num_images: 2,
+      });
       setRunId(result.runId);
       setTaskId(result.taskId);
     } catch (err) {

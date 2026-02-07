@@ -37,6 +37,7 @@ export const task = pgTable("task", {
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
   triggerRunId: text("trigger_run_id"),
+  model: varchar("model", { length: 100 }),
   status: varchar("status", { length: 20 }).notNull().default("PENDING"),
   payload: jsonb("payload").notNull(),
   response: jsonb("response"),

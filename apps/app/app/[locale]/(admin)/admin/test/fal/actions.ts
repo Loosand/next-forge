@@ -28,6 +28,7 @@ export async function triggerFalModelAction<T extends FalModelId>(
     .insert(task)
     .values({
       userId,
+      model: endpointId,
       status: "pending",
       payload: { endpointId, input },
     })
