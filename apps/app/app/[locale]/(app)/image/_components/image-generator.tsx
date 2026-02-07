@@ -7,19 +7,21 @@ import { useRealtimeRun } from "@trigger.dev/react-hooks";
 import { Loader2 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import useSWR from "swr";
+import { IMAGE_MODELS } from "../_constants/models";
 import {
   generateImage,
-  getGenerationHistory,
+  type getGenerationHistory,
   getTaskWithAssets,
 } from "../actions";
-import { IMAGE_MODELS } from "../_constants/models";
 import { AssetDetailDialog } from "./asset-detail-dialog";
 import { EmptyState } from "./empty-state";
 import { GenerationForm, type GenerationParams } from "./generation-form";
 import type { AssetWithMeta } from "./types";
 
 type HistoryItem = Awaited<ReturnType<typeof getGenerationHistory>>[number];
-type TaskWithAssets = NonNullable<Awaited<ReturnType<typeof getTaskWithAssets>>>;
+type TaskWithAssets = NonNullable<
+  Awaited<ReturnType<typeof getTaskWithAssets>>
+>;
 
 const ASPECT_RATIO_TO_SIZE: Record<string, string> = {
   "1:1": "square_hd",
@@ -173,17 +175,16 @@ export function ImageGenerator({ history }: { history: HistoryItem[] }) {
     (phase === "idle" || phase === "submitting") && history.length === 0;
 
   // Enrich current generation assets with metadata
-  const currentAssets: AssetWithMeta[] =
-    hasResults
-      ? taskData.assets.map((a) => ({
-          id: a.id,
-          mediaType: a.mediaType,
-          url: a.url,
-          prompt: lastParams?.prompt ?? null,
-          model: lastParams ? getModelName(lastParams.modelId) : null,
-          createdAt: new Date().toISOString(),
-        }))
-      : [];
+  const currentAssets: AssetWithMeta[] = hasResults
+    ? taskData.assets.map((a) => ({
+        id: a.id,
+        mediaType: a.mediaType,
+        url: a.url,
+        prompt: lastParams?.prompt ?? null,
+        model: lastParams ? getModelName(lastParams.modelId) : null,
+        createdAt: new Date().toISOString(),
+      }))
+    : [];
 
   // Enrich history assets with task-level metadata
   const historyAssets: AssetWithMeta[] = history.flatMap((item) =>
@@ -270,10 +271,10 @@ export function ImageGenerator({ history }: { history: HistoryItem[] }) {
       {selectedAsset && (
         <AssetDetailDialog
           asset={selectedAsset}
-          open={!!selectedAsset}
           onOpenChange={(open) => {
             if (!open) setSelectedAsset(null);
           }}
+          open={!!selectedAsset}
         />
       )}
     </>
