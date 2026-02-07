@@ -7,7 +7,7 @@ export const config: NextConfig = {
     remotePatterns: [],
   },
 
-  serverExternalPackages: ["prettier"],
+  transpilePackages: ["prettier"],
 
   // biome-ignore lint/suspicious/useAwait: rewrites is async
   async rewrites() {
