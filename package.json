@@ -8,8 +8,8 @@
     "dist/index.js"
   ],
   "scripts": {
-    "build": "turbo build",
-    "dev": "turbo dev --filter=!docs --filter=!@repo/cms --filter=!storybook --ui=stream",
+    "build": "turbo build --filter=!api --filter=!@repo/cms",
+    "dev": "turbo dev --filter=!docs --filter=!@repo/cms --filter=!api --filter=!storybook --ui=stream",
     "dev:app": "cd apps/app && bun run dev",
     "dev:api": "cd apps/api && bun run dev",
     "dev:docs": "cd apps/docs && bun run dev",

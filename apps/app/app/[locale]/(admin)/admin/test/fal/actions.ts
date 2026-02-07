@@ -2,7 +2,7 @@
 
 import { auth } from "@repo/auth/server";
 import { database, eq, task } from "@repo/database";
-import type { EndpointTypeMap, FalModelId } from "@repo/fal/types";
+import type { FalEndpointTypeMap, FalModelId } from "@repo/fal/types";
 import { buildUrl } from "@repo/storage";
 import { falRunTask } from "@repo/trigger";
 import { headers } from "next/headers";
@@ -11,7 +11,7 @@ const R2_PUBLIC_URL = process.env.NEXT_PUBLIC_CLOUDFLARE_R2_URL ?? "";
 
 export async function triggerFalModelAction<T extends FalModelId>(
   endpointId: T,
-  input: EndpointTypeMap[T]["input"]
+  input: FalEndpointTypeMap[T]["input"]
 ) {
   const session = await auth.api.getSession({
     headers: await headers(),

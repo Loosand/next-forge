@@ -1,10 +1,12 @@
-import { EmptyState, GenerationForm } from "./_components";
+import { ImageGenerator } from "./_components";
+import { getGenerationHistory } from "./actions";
 
-export default function ImagePage() {
+export default async function ImagePage() {
+  const history = await getGenerationHistory();
+
   return (
     <div className="flex h-(--screen-height-minus-header-mobile-menu) flex-col md:h-(--screen-height-minus-header)">
-      <EmptyState />
-      <GenerationForm />
+      <ImageGenerator history={history} />
     </div>
   );
 }

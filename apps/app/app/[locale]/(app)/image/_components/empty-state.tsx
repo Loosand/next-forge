@@ -49,7 +49,7 @@ const ImageSparkleIcon = () => (
 );
 
 export const EmptyState = () => (
-  <div className="flex flex-1 flex-col items-center justify-center gap-4 px-4">
+  <div className="flex h-full flex-1 flex-col items-center justify-center gap-4 px-4">
     <ImageSparkleIcon />
     <h1 className="font-bold text-4xl uppercase tracking-wider">Nano Banana</h1>
     <p className="text-center text-muted-foreground">

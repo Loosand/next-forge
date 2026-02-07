@@ -1,7 +1,11 @@
 import type { EndpointTypeMap } from "@fal-ai/client/endpoints";
+import type { CustomEndpointTypeMap } from "./custom-endpoints";
 
-export type FalModelId = keyof EndpointTypeMap;
+export type FalEndpointTypeMap = EndpointTypeMap & CustomEndpointTypeMap;
 
-export type FalModelIds = (keyof EndpointTypeMap)[];
+export type FalModelId = keyof FalEndpointTypeMap;
+
+export type FalModelIds = FalModelId[];
 
 export * from "@fal-ai/client/endpoints";
+export * from "./custom-endpoints";
