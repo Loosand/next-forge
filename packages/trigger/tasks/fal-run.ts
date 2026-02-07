@@ -9,7 +9,7 @@
  * 2. 更新后必须上浮检查 /packages/trigger/.folder.md 的描述是否依然准确
  */
 
-import { fal } from "@fal-ai/client";
+import { ApiError, fal } from "@fal-ai/client";
 import { asset, database, eq, task as taskTable } from "@repo/database";
 import { buildKey, fetchAndUpload } from "@repo/storage";
 import { logger, task, wait } from "@trigger.dev/sdk/v3";
@@ -146,28 +146,20 @@ export const falRunTask = task({
     logger.info("Starting fal.ai task", { endpointId, taskId, metadata });
 
     // ========== Phase 1: fal 执行 ==========
-    // submit 只提交，不等结果（避免 subscribe 的长连接 socket 问题）
-    const { request_id: requestId } = await withRetry(
-      () => fal.queue.submit(endpointId, { input }),
-      "fal.queue.submit"
-    );
+    let result: Awaited<ReturnType<typeof fal.queue.result>>;
+    let media: ExtractedMedia[];
 
-    logger.info("Fal task submitted", { endpointId, requestId });
+    try {
+      // submit 只提交，不等结果（避免 subscribe 的长连接 socket 问题）
+      const { request_id: requestId } = await withRetry(
+        () => fal.queue.submit(endpointId, { input }),
+        "fal.queue.submit"
+      );
 
-    // 手动 poll，配合 wait.for() 做 Trigger.dev checkpoint
-    let status = await withRetry(
-      () =>
-        fal.queue.status(endpointId, {
-          requestId,
-          logs: config?.logs ?? true,
-        }),
-      "fal.queue.status"
-    );
+      logger.info("Fal task submitted", { endpointId, requestId });
 
-    while (status.status !== "COMPLETED") {
-      await wait.for({ seconds: pollIntervalSeconds });
-
-      status = await withRetry(
+      // 手动 poll，配合 wait.for() 做 Trigger.dev checkpoint
+      let status = await withRetry(
         () =>
           fal.queue.status(endpointId, {
             requestId,
@@ -175,20 +167,78 @@ export const falRunTask = task({
           }),
         "fal.queue.status"
       );
+
+      while (status.status !== "COMPLETED") {
+        await wait.for({ seconds: pollIntervalSeconds });
+
+        status = await withRetry(
+          () =>
+            fal.queue.status(endpointId, {
+              requestId,
+              logs: config?.logs ?? true,
+            }),
+          "fal.queue.status"
+        );
+      }
+
+      result = await withRetry(
+        () => fal.queue.result(endpointId, { requestId }),
+        "fal.queue.result"
+      );
+
+      media = extractMedia(result.data);
+
+      logger.info("Fal task finished successfully", {
+        endpointId,
+        requestId: result.requestId,
+        mediaCount: media.length,
+      });
+    } catch (falErr) {
+      const isClientError =
+        falErr instanceof ApiError && falErr.status >= 400 && falErr.status < 500;
+
+      // 4xx（参数校验、权限等）：确定性失败，重试无意义，更新 DB 后正常返回
+      if (isClientError) {
+        const { body, status, message } = falErr;
+
+        logger.error("Fal task failed (client error)", {
+          endpointId,
+          taskId,
+          status,
+          error: message,
+          body,
+        });
+
+        if (taskId) {
+          try {
+            await database
+              .update(taskTable)
+              .set({
+                status: "failed",
+                response: {
+                  error: message,
+                  status,
+                  ...(typeof body === "object" && body !== null ? body : {}),
+                },
+              })
+              .where(eq(taskTable.id, taskId));
+          } catch {
+            // DB 不可用，无能为力
+          }
+        }
+
+        return {
+          success: false,
+          error: message,
+          status,
+          body,
+          metadata,
+        };
+      }
+
+      // 5xx / 网络错误等：可能是暂时的，重新抛出让 Trigger.dev 重试
+      throw falErr;
     }
-
-    const result = await withRetry(
-      () => fal.queue.result(endpointId, { requestId }),
-      "fal.queue.result"
-    );
-
-    const media = extractMedia(result.data);
-
-    logger.info("Fal task finished successfully", {
-      endpointId,
-      requestId: result.requestId,
-      mediaCount: media.length,
-    });
 
     // ========== Phase 2: 持久化（非致命，不重跑 fal） ==========
     try {

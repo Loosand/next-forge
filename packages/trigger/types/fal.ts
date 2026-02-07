@@ -66,6 +66,10 @@ export type FalRunResult<TOutput = unknown> =
   | {
       success: false;
       error: string;
+      /** fal API 返回的 HTTP 状态码 */
+      status?: number;
+      /** fal API 返回的完整错误体 */
+      body?: unknown;
       /** 调用方传入的元数据 */
       metadata?: Record<string, unknown>;
     };
