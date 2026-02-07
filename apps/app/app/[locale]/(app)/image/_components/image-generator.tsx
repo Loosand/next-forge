@@ -23,14 +23,6 @@ type TaskWithAssets = NonNullable<
   Awaited<ReturnType<typeof getTaskWithAssets>>
 >;
 
-const ASPECT_RATIO_TO_SIZE: Record<string, string> = {
-  "1:1": "square_hd",
-  "4:3": "landscape_4_3",
-  "3:4": "portrait_4_3",
-  "16:9": "landscape_16_9",
-  "9:16": "portrait_16_9",
-};
-
 const tokenFetcher = (url: string) =>
   fetch(url, { method: "POST" }).then((res) => res.json());
 
@@ -39,23 +31,26 @@ function getModelName(modelId: string | null): string {
   return IMAGE_MODELS.find((m) => m.id === modelId)?.name ?? modelId;
 }
 
-type Phase = "idle" | "submitting" | "generating" | "done";
+/** 把 "4:3" 解析成 [4, 3]，解析失败回退 [1, 1] */
+function parseRatio(ratio: string): [number, number] {
+  const parts = ratio.split(":").map(Number);
+  if (parts.length === 2 && parts[0] > 0 && parts[1] > 0) {
+    return [parts[0], parts[1]];
+  }
+  return [1, 1];
+}
+
+type Phase = "idle" | "submitting" | "generating";
 
 function SkeletonCard({ ratio }: { ratio: string }) {
-  const aspectClass: Record<string, string> = {
-    "1:1": "aspect-square",
-    "4:3": "aspect-[4/3]",
-    "3:4": "aspect-[3/4]",
-    "16:9": "aspect-video",
-    "9:16": "aspect-[9/16]",
-  };
+  const [w, h] = parseRatio(ratio);
 
   return (
     <div
       className={cn(
-        "mb-3 break-inside-avoid overflow-hidden rounded-xl border bg-muted",
-        aspectClass[ratio] ?? "aspect-square"
+        "mb-3 break-inside-avoid overflow-hidden rounded-xl border bg-muted"
       )}
+      style={{ aspectRatio: `${w} / ${h}` }}
     >
       <div className="flex h-full w-full items-center justify-center">
         <Loader2 className="size-6 animate-spin text-muted-foreground" />
@@ -102,6 +97,7 @@ export function ImageGenerator({ history }: { history: HistoryItem[] }) {
   const [pendingRatio, setPendingRatio] = useState("1:1");
   const [lastParams, setLastParams] = useState<GenerationParams | null>(null);
 
+  const [completedAssets, setCompletedAssets] = useState<AssetWithMeta[]>([]);
   const [selectedAsset, setSelectedAsset] = useState<AssetWithMeta | null>(
     null
   );
@@ -129,9 +125,29 @@ export function ImageGenerator({ history }: { history: HistoryItem[] }) {
   useEffect(() => {
     if (taskData && phase === "generating" && !doneRef.current) {
       doneRef.current = true;
-      setPhase("done");
+
+      if (taskData.status === "completed" && taskData.assets.length > 0) {
+        setCompletedAssets((prev) => [
+          ...taskData.assets.map((a) => ({
+            id: a.id,
+            mediaType: a.mediaType,
+            url: a.url,
+            prompt: lastParams?.input?.prompt ?? null,
+            model: lastParams ? getModelName(lastParams.modelId) : null,
+            createdAt: new Date().toISOString(),
+          })),
+          ...prev,
+        ]);
+      } else if (taskData.status === "failed") {
+        setError(
+          (taskData.response as { error?: string })?.error ??
+            "Generation failed"
+        );
+      }
+
+      setPhase("idle");
     }
-  }, [taskData, phase]);
+  }, [taskData, phase, lastParams]);
 
   const handleSubmit = useCallback(
     async (params: GenerationParams) => {
@@ -142,16 +158,14 @@ export function ImageGenerator({ history }: { history: HistoryItem[] }) {
       setError(null);
       setRunId(null);
       setTaskId(null);
-      setPendingCount(params.count);
-      setPendingRatio(params.aspectRatio);
+      setPendingCount(params.input.count ?? 1);
+      setPendingRatio(params.input.aspectRatio);
       setLastParams(params);
 
       try {
         const result = await generateImage({
           endpointId: params.modelId,
-          prompt: params.prompt,
-          aspectRatio: ASPECT_RATIO_TO_SIZE[params.aspectRatio],
-          numImages: params.count,
+          input: params.input,
         });
         setRunId(result.runId);
         setTaskId(result.taskId);
@@ -164,39 +178,28 @@ export function ImageGenerator({ history }: { history: HistoryItem[] }) {
     [accessToken]
   );
 
-  const hasResults =
-    phase === "done" &&
-    taskData?.status === "completed" &&
-    taskData.assets.length > 0;
-  const hasFailed = phase === "done" && taskData?.status === "failed";
-  const showHistory =
-    (phase === "idle" || phase === "submitting") && history.length > 0;
   const showEmpty =
-    (phase === "idle" || phase === "submitting") && history.length === 0;
+    phase === "idle" && completedAssets.length === 0 && history.length === 0;
 
-  // Enrich current generation assets with metadata
-  const currentAssets: AssetWithMeta[] = hasResults
-    ? taskData.assets.map((a) => ({
+  // Dedup: exclude history assets already in completedAssets
+  const completedIds = new Set(completedAssets.map((a) => a.id));
+  const historyAssets: AssetWithMeta[] = history.flatMap((item) =>
+    item.assets
+      .filter((a) => !completedIds.has(a.id))
+      .map((a) => ({
         id: a.id,
         mediaType: a.mediaType,
         url: a.url,
-        prompt: lastParams?.prompt ?? null,
-        model: lastParams ? getModelName(lastParams.modelId) : null,
-        createdAt: new Date().toISOString(),
+        prompt: item.prompt,
+        model: getModelName(item.model),
+        createdAt: item.createdAt,
       }))
-    : [];
-
-  // Enrich history assets with task-level metadata
-  const historyAssets: AssetWithMeta[] = history.flatMap((item) =>
-    item.assets.map((a) => ({
-      id: a.id,
-      mediaType: a.mediaType,
-      url: a.url,
-      prompt: item.prompt,
-      model: getModelName(item.model),
-      createdAt: item.createdAt,
-    }))
   );
+
+  const hasContent =
+    phase === "generating" ||
+    completedAssets.length > 0 ||
+    historyAssets.length > 0;
 
   return (
     <>
@@ -211,52 +214,32 @@ export function ImageGenerator({ history }: { history: HistoryItem[] }) {
           </div>
         )}
 
-        {/* Failed */}
-        {hasFailed && (
-          <div className="rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-2 text-destructive text-sm">
-            {(taskData.response as { error?: string })?.error ??
-              "Generation failed"}
-          </div>
-        )}
-
-        {/* Skeletons */}
-        {phase === "generating" && (
-          <div>
-            <div className={masonryClass}>
-              {Array.from({ length: pendingCount }, (_, i) => (
-                <SkeletonCard key={i} ratio={pendingRatio} />
+        {/* Unified masonry grid */}
+        {hasContent && (
+          <div className={masonryClass}>
+            {/* Skeletons for current generation */}
+            {phase === "generating" &&
+              Array.from({ length: pendingCount }, (_, i) => (
+                <SkeletonCard key={`skeleton-${i}`} ratio={pendingRatio} />
               ))}
-            </div>
-          </div>
-        )}
 
-        {/* Current generation results */}
-        {hasResults && (
-          <div className="mx-auto">
-            <div className={masonryClass}>
-              {currentAssets.map((a) => (
-                <AssetCard
-                  asset={a}
-                  key={a.id}
-                  onClick={() => setSelectedAsset(a)}
-                />
-              ))}
-            </div>
-          </div>
-        )}
+            {/* Accumulated completed results */}
+            {completedAssets.map((a) => (
+              <AssetCard
+                asset={a}
+                key={a.id}
+                onClick={() => setSelectedAsset(a)}
+              />
+            ))}
 
-        {/* History */}
-        {showHistory && (
-          <div>
-            <div className={masonryClass}>
-              {historyAssets.map((a) => (
-                <AssetCard
-                  asset={a}
-                  key={a.id}
-                  onClick={() => setSelectedAsset(a)}
-                />
-              ))}
-            </div>
+            {/* History */}
+            {historyAssets.map((a) => (
+              <AssetCard
+                asset={a}
+                key={a.id}
+                onClick={() => setSelectedAsset(a)}
+              />
+            ))}
           </div>
         )}
       </div>

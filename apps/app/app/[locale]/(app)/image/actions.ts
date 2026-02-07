@@ -7,14 +7,18 @@ import { buildUrl } from "@repo/storage";
 import { falRunTask } from "@repo/trigger";
 import { headers } from "next/headers";
 import { env } from "@/env";
+import { IMAGE_MODELS } from "./_constants/models";
 
 const R2_PUBLIC_URL = env.NEXT_PUBLIC_CLOUDFLARE_R2_URL ?? "";
 
 export async function generateImage(params: {
   endpointId: FalModelId;
-  prompt: string;
-  aspectRatio?: string;
-  numImages?: number;
+  input: {
+    prompt: string;
+    aspectRatio: string; // 统一比例字符串，如 "1:1"
+    count?: number;
+    [key: string]: unknown;
+  };
 }) {
   const session = await auth.api.getSession({
     headers: await headers(),
@@ -24,17 +28,39 @@ export async function generateImage(params: {
     throw new Error("Not logged in");
   }
 
-  if (!params.prompt.trim()) {
+  if (!params.input.prompt.trim()) {
     throw new Error("Prompt is required");
   }
 
   const userId = session.user.id;
 
-  const input = {
-    prompt: params.prompt,
-    image_size: params.aspectRatio,
-    num_images: params.numImages ?? 1,
-  };
+  // 所有 API 字段名都来自模型定义，action 层零硬编码
+  const modelDef = IMAGE_MODELS.find((m) => m.id === params.endpointId);
+  const mp = modelDef?.params;
+
+  // 从 input 中拆出已知字段，剩余的直接透传给 API
+  const { prompt, aspectRatio, count, ...rest } = params.input;
+
+  const input: Record<string, unknown> = {};
+
+  // prompt
+  input[mp?.prompt.field ?? "prompt"] = prompt;
+
+  // size: 用 ratioMap 把统一比例翻译成 API 实际需要的值
+  if (mp) {
+    const apiValue = mp.size.ratioMap[aspectRatio];
+    input[mp.size.field] = apiValue ?? aspectRatio;
+  }
+
+  // count
+  if (mp?.count && count) {
+    input[mp.count.field] = count;
+  }
+
+  // 其余参数（如 resolution 等）直接透传
+  for (const [key, value] of Object.entries(rest)) {
+    input[key] = value;
+  }
 
   const [taskRecord] = await database
     .insert(task)
