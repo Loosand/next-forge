@@ -18,16 +18,3 @@ export type { TRegistrationMeta } from "../types";
 // ============================================
 
 export * from "./auth";
-
-// ============================================
-// 跨模块 Relations
-// ============================================
-
-import { relations } from "drizzle-orm";
-import { user } from "./auth";
-
-export const userRelationsExtended = relations(user, ({ many }) => ({
-  sessions: many(user),
-  accounts: many(user),
-  subscriptions: many(user),
-}));
