@@ -7,6 +7,5 @@
  * 1. 新增任务时，必须在此文件中添加导出
  * 2. 更新后必须上浮检查 /packages/trigger/.folder.md 的描述是否依然准确
  */
-
 export { keys } from "./keys";
 export { helloWorldTask } from "./tasks/hello-world";
