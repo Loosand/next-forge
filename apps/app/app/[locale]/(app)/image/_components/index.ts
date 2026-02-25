@@ -1,2 +1,1 @@
-export { EmptyState } from "./empty-state";
-export { GenerationForm } from "./generation-form";
+export { ImageGenerator } from "./image-generator";

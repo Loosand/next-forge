@@ -1,104 +1,92 @@
 "use client";
 
 import { Button } from "@repo/design-system/components/ui/button";
+import { CountSelector } from "@repo/design-system/components/ui/count-selector";
 import { cn } from "@repo/design-system/lib/utils";
-import {
-  ChevronRight,
-  Minus,
-  Pencil,
-  Plus,
-  RefreshCw,
-  Sparkles,
-} from "lucide-react";
-import { useState } from "react";
+import type { FalModelId } from "@repo/fal/types";
+import { Loader2, Plus } from "lucide-react";
+import { useCallback, useMemo, useState } from "react";
+import { DEFAULT_MODEL_ID, IMAGE_MODELS } from "../_constants/models";
+import { ExtraParamControl } from "./extra-param-control";
+import { ModelSelector } from "./model-selector";
+import { SizeSelector } from "./size-selector";
 
-const ModelSelector = () => (
-  <button
-    className={cn(
-      "flex items-center gap-2 rounded-xl px-3 py-2",
-      "bg-primary/10 text-primary",
-      "font-medium text-sm",
-      "transition hover:bg-primary/20 active:opacity-60"
-    )}
-    type="button"
-  >
-    <Sparkles className="size-4" />
-    <span>Nano Banana</span>
-    <ChevronRight className="size-4" />
-  </button>
-);
+export type GenerationParams = {
+  modelId: FalModelId;
+  input: {
+    prompt: string;
+    aspectRatio: string; // 统一的比例字符串，如 "1:1"、"4:3"
+    count?: number;
+    [key: string]: unknown;
+  };
+};
 
-const CountSelector = ({
-  count,
-  onCountChange,
+function getModelParams(modelId: FalModelId) {
+  return IMAGE_MODELS.find((m) => m.id === modelId)?.params;
+}
+
+function getDefaultExtras(
+  extras?: { field: string; default: string }[]
+): Record<string, string> {
+  if (!extras) return {};
+  const result: Record<string, string> = {};
+  for (const e of extras) {
+    result[e.field] = e.default;
+  }
+  return result;
+}
+
+export const GenerationForm = ({
+  isSubmitting,
+  onSubmit,
 }: {
-  count: number;
-  onCountChange: (count: number) => void;
-}) => (
-  <div className="flex items-center gap-1 rounded-xl bg-secondary px-1 py-1">
-    <button
-      className="rounded-lg p-1.5 text-muted-foreground transition hover:bg-background hover:text-foreground"
-      onClick={() => onCountChange(Math.max(1, count - 1))}
-      type="button"
-    >
-      <Minus className="size-4" />
-    </button>
-    <span className="min-w-8 text-center font-medium text-sm">{count}/4</span>
-    <button
-      className="rounded-lg p-1.5 text-muted-foreground transition hover:bg-background hover:text-foreground"
-      onClick={() => onCountChange(Math.min(4, count + 1))}
-      type="button"
-    >
-      <Plus className="size-4" />
-    </button>
-  </div>
-);
-
-const ToggleButton = ({
-  icon: Icon,
-  label,
-  isActive,
-  onClick,
-}: {
-  icon: React.ElementType;
-  label: string;
-  isActive: boolean;
-  onClick: () => void;
-}) => (
-  <button
-    className={cn(
-      "flex items-center gap-2 rounded-xl px-3 py-2",
-      "font-medium text-sm",
-      "transition active:opacity-60",
-      isActive
-        ? "bg-foreground text-background"
-        : "bg-secondary text-muted-foreground hover:text-foreground"
-    )}
-    onClick={onClick}
-    type="button"
-  >
-    <Icon className="size-4" />
-    <span>{label}</span>
-  </button>
-);
-
-export const GenerationForm = () => {
+  isSubmitting: boolean;
+  onSubmit: (params: GenerationParams) => void;
+}) => {
   const [prompt, setPrompt] = useState("");
+  const [modelId, setModelId] = useState(DEFAULT_MODEL_ID);
+
+  const params = useMemo(() => getModelParams(modelId), [modelId]);
+
+  const [aspectRatio, setAspectRatio] = useState(params?.size.default ?? "1:1");
   const [count, setCount] = useState(1);
-  const [autoMode, setAutoMode] = useState(true);
-  const [drawMode, setDrawMode] = useState(false);
+  const [extras, setExtras] = useState<Record<string, string>>(
+    getDefaultExtras(params?.extras)
+  );
+
+  // 切换模型时重置所有参数到新模型的默认值
+  const handleModelChange = useCallback((newModelId: FalModelId) => {
+    setModelId(newModelId);
+    const newParams = getModelParams(newModelId);
+    if (newParams) {
+      setAspectRatio(newParams.size.default);
+      setCount(1);
+      setExtras(getDefaultExtras(newParams.extras));
+    }
+  }, []);
+
+  const handleExtraChange = useCallback((field: string, value: string) => {
+    setExtras((prev) => ({ ...prev, [field]: value }));
+  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle form submission
-    console.log({ prompt, count, autoMode, drawMode });
+    if (!prompt.trim() || isSubmitting) return;
+    onSubmit({
+      modelId,
+      input: {
+        prompt: prompt.trim(),
+        aspectRatio,
+        ...(params?.count ? { count } : {}),
+        ...extras,
+      },
+    });
   };
 
   return (
-    <div className="sticky bottom-0 w-full p-4">
+    <div className="fixed inset-x-0 bottom-4 mx-auto w-full max-w-4xl">
       <form
         className={cn(
-          "mx-auto max-w-4xl",
           "rounded-2xl border border-border/50 bg-card p-3",
           "shadow-background/50 shadow-lg",
           "flex h-full items-center justify-between"
@@ -135,28 +123,50 @@ export const GenerationForm = () => {
 
           {/* Options row */}
           <div className="mt-3 flex flex-wrap items-center gap-2">
-            <ModelSelector />
-            <CountSelector count={count} onCountChange={setCount} />
-            <ToggleButton
-              icon={RefreshCw}
-              isActive={autoMode}
-              label="Auto"
-              onClick={() => setAutoMode(!autoMode)}
-            />
-            <ToggleButton
-              icon={Pencil}
-              isActive={drawMode}
-              label="Draw"
-              onClick={() => setDrawMode(!drawMode)}
-            />
+            <ModelSelector onChange={handleModelChange} value={modelId} />
+            {params && (
+              <SizeSelector
+                onChange={setAspectRatio}
+                scheme={params.size}
+                value={aspectRatio}
+              />
+            )}
+            {params?.count && (
+              <CountSelector
+                count={count}
+                max={params.count.max}
+                onCountChange={setCount}
+              />
+            )}
+            {params?.extras?.map((extra) => (
+              <ExtraParamControl
+                key={extra.field}
+                onChange={(v) => handleExtraChange(extra.field, v)}
+                param={extra}
+                value={extras[extra.field] ?? extra.default}
+              />
+            ))}
           </div>
         </div>
 
-        <Button className="h-[80%] gap-2 px-6" type="submit">
-          Generate
-          <span className="flex items-center gap-0.5 text-xs opacity-80">
-            <Plus className="size-3" />1
-          </span>
+        <Button
+          className="h-20 w-30 cursor-pointer gap-2 font-semibold"
+          disabled={isSubmitting || !prompt.trim()}
+          type="submit"
+        >
+          {isSubmitting ? (
+            <>
+              <Loader2 className="size-4 animate-spin" />
+              Generate
+            </>
+          ) : (
+            <>
+              Generate
+              <span className="flex items-center gap-0.5 opacity-80">
+                {params?.count ? count : 1}
+              </span>
+            </>
+          )}
         </Button>
       </form>
     </div>

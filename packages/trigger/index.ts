@@ -8,12 +8,7 @@
  * 2. 更新后必须上浮检查 /packages/trigger/.folder.md 的描述是否依然准确
  */
 export { keys } from "./keys";
-export {
-  triggerNanoBanana,
-  triggerNanoBananaEdit,
-  triggerNanoBananaPro,
-  triggerNanoBananaProEdit,
-} from "./tasks/fal-models";
-export { createTypedFalTrigger, falRunTask } from "./tasks/fal-run";
+
+export { falRunTask } from "./tasks/fal-run";
 export { helloWorldTask } from "./tasks/hello-world";
-export type { FalRunPayload, FalRunResult } from "./types/fal";
+export type { ExtractedMedia, FalRunPayload, FalRunResult } from "./types/fal";

@@ -1,37 +1,25 @@
+/** biome-ignore-all lint/a11y/useMediaCaption: <explanation> */
 "use client";
 
 import { Button } from "@repo/design-system/components/ui/button";
 import { Input } from "@repo/design-system/components/ui/input";
-import type { NanoBananaOutput } from "@repo/fal/types";
-import type { FalRunResult, falRunTask } from "@repo/trigger";
+import type { falRunTask } from "@repo/trigger";
 import { useRealtimeRun } from "@trigger.dev/react-hooks";
 import { useState } from "react";
 import useSWR from "swr";
-import { triggerNanoBananaAction } from "./actions";
+import {
+  getTaskWithAssets,
+  type TaskWithAssets,
+  triggerFalModelAction,
+} from "./actions";
 
-// Type alias for the specific output type
-type NanoBananaRunResult = FalRunResult<NanoBananaOutput>;
-
-// Type guard for successful result
-function isSuccessResult(
-  output: NanoBananaRunResult | undefined
-): output is Extract<NanoBananaRunResult, { success: true }> {
-  return output?.success === true;
-}
-
-// Type guard for failed result
-function isFailedResult(
-  output: NanoBananaRunResult | undefined
-): output is Extract<NanoBananaRunResult, { success: false }> {
-  return output?.success === false;
-}
-
-const fetcher = (url: string) =>
+const tokenFetcher = (url: string) =>
   fetch(url, { method: "POST" }).then((res) => res.json());
 
 export function FalForm() {
   const [prompt, setPrompt] = useState("A beautiful sunset over mountains");
   const [runId, setRunId] = useState<string | null>(null);
+  const [taskId, setTaskId] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -39,18 +27,28 @@ export function FalForm() {
     data: tokenData,
     error: tokenError,
     isLoading: tokenLoading,
-  } = useSWR<{ token: string; error?: string }>("/api/trigger/token", fetcher, {
-    revalidateOnFocus: false,
-    revalidateOnReconnect: false,
-  });
+  } = useSWR<{ token: string; error?: string }>(
+    "/api/trigger/token",
+    tokenFetcher,
+    { revalidateOnFocus: false, revalidateOnReconnect: false }
+  );
 
   const accessToken = tokenData?.token;
 
-  // 使用 useRealtimeRun 跟踪任务状态
-  const { run, error } = useRealtimeRun<typeof falRunTask>(runId ?? undefined, {
-    accessToken: accessToken ?? "",
-    enabled: !!accessToken && !!runId,
-  });
+  // Trigger.dev 实时跟踪
+  const { run, error: runError } = useRealtimeRun<typeof falRunTask>(
+    runId ?? undefined,
+    {
+      accessToken: accessToken ?? "",
+      enabled: !!accessToken && !!runId,
+    }
+  );
+
+  // run 完成后一次性拉取 DB task + assets
+  const { data: taskData } = useSWR<TaskWithAssets | null>(
+    taskId && run?.finishedAt ? `task-${taskId}` : null,
+    () => getTaskWithAssets(taskId!)
+  );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -58,12 +56,16 @@ export function FalForm() {
 
     setIsSubmitting(true);
     setSubmitError(null);
+    setRunId(null);
+    setTaskId(null);
 
     try {
-      const result = await triggerNanoBananaAction({
+      const result = await triggerFalModelAction("fal-ai/z-image/turbo", {
         prompt,
+        num_images: 2,
       });
       setRunId(result.runId);
+      setTaskId(result.taskId);
     } catch (err) {
       setSubmitError(err instanceof Error ? err.message : String(err));
     } finally {
@@ -88,100 +90,132 @@ export function FalForm() {
     );
   }
 
-  const isLoading = isSubmitting || (run && !run.finishedAt);
+  const isRunning = isSubmitting || (run && !run.finishedAt);
 
   return (
     <div className="w-full max-w-md space-y-4">
       <form className="flex gap-2" onSubmit={handleSubmit}>
         <Input
-          disabled={isLoading}
+          disabled={!!isRunning}
           onChange={(e) => setPrompt(e.target.value)}
           placeholder="Enter a prompt..."
           type="text"
           value={prompt}
         />
-        <Button disabled={isLoading} type="submit">
-          {isLoading ? "Generating..." : "Generate Image"}
+        <Button disabled={!!isRunning} type="submit">
+          {isRunning ? "Generating..." : "Generate Image"}
         </Button>
       </form>
 
-      {(error || submitError) && (
+      {(runError || submitError) && (
         <div className="rounded-lg bg-red-100 p-4 text-red-800 dark:bg-red-900 dark:text-red-100">
           <p className="font-medium">Error</p>
-          <p className="text-sm">{error?.message || submitError}</p>
+          <p className="text-sm">{runError?.message || submitError}</p>
         </div>
       )}
 
-      {run && (
-        <div className="space-y-3 rounded-lg border p-4">
+      {/* Trigger.dev 实时进度（队列中、执行中） */}
+      {run && !taskData && (
+        <div className="space-y-2 rounded-lg border p-4">
           <div className="flex items-center justify-between">
-            <span className="font-medium">Task Status</span>
+            <span className="font-medium">Run Progress</span>
             <StatusBadge status={run.status} />
           </div>
-
           <div className="space-y-1 text-sm">
             <div className="flex justify-between">
               <span className="text-muted-foreground">Run ID</span>
               <span className="font-mono text-xs">{run.id}</span>
             </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Created</span>
-              <span>{new Date(run.createdAt).toLocaleTimeString()}</span>
-            </div>
-            {run.finishedAt && (
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Finished</span>
-                <span>{new Date(run.finishedAt).toLocaleTimeString()}</span>
-              </div>
-            )}
+          </div>
+        </div>
+      )}
+
+      {/* DB Task 状态 + Assets */}
+      {taskData && (
+        <div className="space-y-3 rounded-lg border p-4">
+          <div className="flex items-center justify-between">
+            <span className="font-medium">Task</span>
+            <StatusBadge status={taskData.status} />
           </div>
 
-          {run.output && (
+          <div className="space-y-1 text-sm">
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Task ID</span>
+              <span className="font-mono text-xs">{taskData.id}</span>
+            </div>
+            {taskData.triggerRunId && (
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Run ID</span>
+                <span className="font-mono text-xs">
+                  {taskData.triggerRunId}
+                </span>
+              </div>
+            )}
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Created</span>
+              <span>{new Date(taskData.createdAt).toLocaleTimeString()}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Updated</span>
+              <span>{new Date(taskData.updatedAt).toLocaleTimeString()}</span>
+            </div>
+          </div>
+
+          {/* 完成：显示 assets */}
+          {taskData.status === "completed" && taskData.assets.length > 0 && (
             <div className="space-y-2 rounded-md bg-green-50 p-3 dark:bg-green-950">
               <p className="font-medium text-green-800 text-sm dark:text-green-200">
-                Output
+                Assets ({taskData.assets.length})
               </p>
-              {(() => {
-                const output = run.output as NanoBananaRunResult;
-                if (isSuccessResult(output) && output.result.data.images) {
-                  return (
-                    <div className="space-y-2">
-                      {output.result.data.images.map((img, i) => (
-                        <img
-                          alt={`Generated ${i + 1}`}
-                          className="max-w-full rounded-md"
-                          key={img.url}
-                          src={img.url}
-                        />
-                      ))}
-                    </div>
-                  );
-                }
-                if (isFailedResult(output)) {
-                  return (
-                    <p className="text-red-600 text-sm">
-                      Error: {output.error}
+              <div className="space-y-2">
+                {taskData.assets.map((a) => (
+                  <div className="space-y-1" key={a.id}>
+                    {a.mediaType === "image" && (
+                      <img
+                        alt={`Asset ${a.id}`}
+                        className="max-w-full rounded-md"
+                        src={a.url}
+                      />
+                    )}
+                    {a.mediaType === "video" && (
+                      <video
+                        className="max-w-full rounded-md"
+                        controls
+                        src={a.url}
+                      />
+                    )}
+                    {a.mediaType === "audio" && (
+                      <audio className="w-full" controls src={a.url} />
+                    )}
+                    <p className="font-mono text-muted-foreground text-xs">
+                      {a.storageKey}
                     </p>
-                  );
-                }
-                return null;
-              })()}
-              <pre className="mt-2 overflow-auto font-mono text-green-700 text-xs dark:text-green-300">
-                {JSON.stringify(run.output, null, 2)}
-              </pre>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {taskData.status === "completed" && taskData.assets.length === 0 && (
+            <p className="text-muted-foreground text-sm">
+              Task completed with no assets.
+            </p>
+          )}
+
+          {/* 失败：显示错误 */}
+          {taskData.status === "failed" && !!taskData.response && (
+            <div className="rounded-md bg-red-50 p-3 dark:bg-red-950">
+              <p className="font-medium text-red-800 text-sm dark:text-red-200">
+                Failed
+              </p>
+              <p className="text-red-600 text-sm dark:text-red-400">
+                {(taskData.response as { error?: string }).error ??
+                  JSON.stringify(taskData.response)}
+              </p>
             </div>
           )}
         </div>
       )}
-
-      <div className="rounded-md border border-gray-200 p-4 text-sm dark:border-gray-700">
-        <h2 className="mb-2 font-medium">Test Details</h2>
-        <ul className="space-y-1 text-muted-foreground">
-          <li>Endpoint: fal-ai/nano-banana</li>
-          <li>Model: Nano Banana (fast text-to-image)</li>
-          <li>Using: triggerNanoBanana (typed trigger)</li>
-        </ul>
-      </div>
     </div>
   );
 }
@@ -211,6 +245,18 @@ function StatusBadge({ status }: { status: string }) {
     CANCELED: {
       bg: "bg-gray-100 dark:bg-gray-800",
       text: "text-gray-700 dark:text-gray-300",
+    },
+    pending: {
+      bg: "bg-gray-100 dark:bg-gray-800",
+      text: "text-gray-700 dark:text-gray-300",
+    },
+    completed: {
+      bg: "bg-green-100 dark:bg-green-900",
+      text: "text-green-700 dark:text-green-300",
+    },
+    failed: {
+      bg: "bg-red-100 dark:bg-red-900",
+      text: "text-red-700 dark:text-red-300",
     },
   };
 
