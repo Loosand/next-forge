@@ -37,7 +37,7 @@
     "@t3-oss/env-nextjs": "^0.13.8",
     "@trigger.dev/react-hooks": "4.3.3",
     "date-fns": "^4.1.0",
-    "evlog": "^1.1.0",
+    "evlog": "^2.10.0",
     "fumadocs-core": "^16.2.3",
     "fuse.js": "^7.1.0",
     "import-in-the-middle": "^3.0.0",
